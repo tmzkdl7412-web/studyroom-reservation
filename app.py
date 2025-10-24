@@ -469,18 +469,21 @@ def extend_confirm():
 # -------------------------------
 @app.route("/cancel_all", methods=["GET", "POST"])
 def cancel_all():
+    # ① GET 요청: 검색 폼 보여주기
     if request.method == "GET":
         return render_template("cancel_all.html")
 
+    # ② POST 요청: 입력값 받기
     leader_name = request.form.get("leader_name", "").strip()
     leader_id = request.form.get("leader_id", "").strip().upper()
     leader_phone = request.form.get("leader_phone", "").strip()
 
+    # 입력값 확인
     if not leader_name or not leader_id or not leader_phone:
         safe_flash("⚠️ 이름, 학번, 전화번호를 모두 입력해주세요.")
         return redirect(url_for("cancel_all"))
 
-    # 본인 정보에 해당하는 예약만 조회
+    # ③ 단체석 / 개인석 예약 모두 검색
     group_reservations = Reservation.query.filter_by(
         leader_name=leader_name,
         leader_id=leader_id,
@@ -493,11 +496,12 @@ def cancel_all():
         leader_phone=leader_phone
     ).order_by(PersonalReservation.date, cast(PersonalReservation.hour, Integer)).all()
 
+    # ④ 결과 없을 때
     if not group_reservations and not personal_reservations:
         safe_flash("❌ 예약 내역이 없습니다.")
         return redirect(url_for("cancel_all"))
 
-    # 예약 결과 페이지 렌더링 (전화번호는 hidden으로 전달됨)
+    # ⑤ 결과 페이지로 전달
     return render_template(
         "cancel_all_result.html",
         group_reservations=group_reservations,
@@ -506,7 +510,6 @@ def cancel_all():
         leader_id=leader_id,
         leader_phone=leader_phone
     )
-
 
 @app.route("/cancel_all_confirm", methods=["POST"])
 def cancel_all_confirm():
