@@ -13,6 +13,7 @@
       overflow-x: hidden;
     }
 
+    /* 상단·하단 남색 라인 */
     .top-bar, .bottom-bar {
       height: 30px;
       width: 100%;
@@ -57,7 +58,7 @@
       display: flex;
       justify-content: center;
       align-items: center;
-      margin-bottom: 10px;
+      margin: 20px 0;
     }
 
     img.mascot {
@@ -65,28 +66,26 @@
       filter: drop-shadow(0 6px 15px rgba(0, 0, 0, 0.15));
     }
 
-    /* ✅ 버튼 전체 영역 */
+    /* ✅ 단체석 / 개인석 버튼 가로 정렬 */
     .button-container {
       display: flex;
       justify-content: center;
       align-items: center;
-      gap: 8vw; /* 화면 너비 비율로 간격 조정 */
       flex-wrap: nowrap;
+      gap: 8vw; /* 화면 너비에 맞춰 자동 간격 조정 */
       margin-top: 20px;
-      flex-direction: row;
     }
 
-    /* ✅ 버튼 스타일 (a 태그를 버튼처럼) */
     .main-btn {
       display: flex;
       justify-content: center;
       align-items: center;
-      width: clamp(120px, 30vw, 220px);
-      height: clamp(120px, 30vw, 220px);
+      width: clamp(120px, 25vw, 230px);
+      height: clamp(120px, 25vw, 230px);
       border-radius: 50%;
       background-color: #1557c0;
       color: white;
-      font-size: clamp(16px, 4vw, 24px);
+      font-size: clamp(16px, 3.5vw, 26px);
       font-weight: bold;
       text-decoration: none;
       box-shadow: 0 8px 15px rgba(0, 0, 0, 0.1);
@@ -99,14 +98,14 @@
       transform: translateY(-5px);
     }
 
-    /* ✅ 반응형 크기 조정 */
+    /* ✅ 버튼 비율만 자동 축소 (가로 유지) */
     @media (max-width: 768px) {
       .button-container {
-        gap: 6vw; /* 모바일에서 약간 좁게 */
+        gap: 6vw;
       }
       .main-btn {
-        width: 32vw;
-        height: 32vw;
+        width: 34vw;
+        height: 34vw;
         font-size: 4vw;
       }
     }
@@ -163,7 +162,6 @@
       <img src="{{ url_for('static', filename='wow.png') }}" alt="학과 마스코트" class="mascot" />
     </div>
 
-    <!-- ✅ 항상 가로 정렬 -->
     <div class="button-container">
       <a href="{{ url_for('room_detail') }}?room=1" class="main-btn">단체석</a>
       <a href="{{ url_for('personal_detail') }}?seat=1" class="main-btn">개인석</a>
