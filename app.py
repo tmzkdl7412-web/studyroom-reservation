@@ -464,73 +464,90 @@ def cancel_all():
 
     leader_name = request.form.get("leader_name", "").strip()
     leader_id = request.form.get("leader_id", "").strip().upper()
-    leader_phone = request.form.get("leader_phone", "").strip()  # ✅ 추가
+    leader_phone = request.form.get("leader_phone", "").strip()
 
-    if not leader_name and not leader_id and not leader_phone:
+    if not leader_name or not leader_id or not leader_phone:
         safe_flash("⚠️ 이름, 학번, 전화번호를 모두 입력해주세요.")
         return redirect(url_for("cancel_all"))
 
+    # 본인 정보에 해당하는 예약만 조회
     group_reservations = Reservation.query.filter_by(
-        leader_name=leader_name, leader_id=leader_id, leader_phone=leader_phone
+        leader_name=leader_name,
+        leader_id=leader_id,
+        leader_phone=leader_phone
     ).order_by(Reservation.date, cast(Reservation.hour, Integer)).all()
 
     personal_reservations = PersonalReservation.query.filter_by(
-        leader_name=leader_name, leader_id=leader_id, leader_phone=leader_phone
+        leader_name=leader_name,
+        leader_id=leader_id,
+        leader_phone=leader_phone
     ).order_by(PersonalReservation.date, cast(PersonalReservation.hour, Integer)).all()
 
     if not group_reservations and not personal_reservations:
         safe_flash("❌ 예약 내역이 없습니다.")
         return redirect(url_for("cancel_all"))
 
+    # 예약 결과 페이지 렌더링 (전화번호는 hidden으로 전달됨)
     return render_template(
         "cancel_all_result.html",
         group_reservations=group_reservations,
         personal_reservations=personal_reservations,
-        leader_name=leader_name, leader_id=leader_id, leader_phone=leader_phone  # ✅ 전달
+        leader_name=leader_name,
+        leader_id=leader_id,
+        leader_phone=leader_phone
     )
+
+
 @app.route("/cancel_all_confirm", methods=["POST"])
 def cancel_all_confirm():
     selected_items = request.form.getlist("selected")
     leader_name = request.form.get("leader_name", "").strip()
     leader_id = request.form.get("leader_id", "").strip().upper()
-    leader_phone = request.form.get("leader_phone", "").strip()  # ✅ 추가
+    leader_phone = request.form.get("leader_phone", "").strip()
 
-    # 선택 항목이 없는 경우
     if not selected_items:
         safe_flash("⚠️ 선택된 예약이 없습니다.")
         group_reservations = Reservation.query.filter_by(
-            leader_name=leader_name, leader_id=leader_id, leader_phone=leader_phone
+            leader_name=leader_name,
+            leader_id=leader_id,
+            leader_phone=leader_phone
         ).order_by(Reservation.date, cast(Reservation.hour, Integer)).all()
         personal_reservations = PersonalReservation.query.filter_by(
-            leader_name=leader_name, leader_id=leader_id, leader_phone=leader_phone
+            leader_name=leader_name,
+            leader_id=leader_id,
+            leader_phone=leader_phone
         ).order_by(PersonalReservation.date, cast(PersonalReservation.hour, Integer)).all()
+
         return render_template(
             "cancel_all_result.html",
             group_reservations=group_reservations,
             personal_reservations=personal_reservations,
             leader_name=leader_name,
             leader_id=leader_id,
-            leader_phone=leader_phone  # ✅ 전달
+            leader_phone=leader_phone
         )
 
-    # 예약 취소 로직
     group_deleted, personal_deleted = 0, 0
     for item in selected_items:
         try:
             type_, target, date, hour = item.split("_", 3)
             if type_ == "group":
                 group_deleted += Reservation.query.filter_by(
-                    room=target, date=date, hour=hour,
+                    room=target,
+                    date=date,
+                    hour=hour,
                     leader_name=leader_name,
                     leader_id=leader_id,
-                    leader_phone=leader_phone  # ✅ 인증 강화
+                    leader_phone=leader_phone
                 ).delete() or 0
             elif type_ == "personal":
                 personal_deleted += PersonalReservation.query.filter_by(
-                    seat=target, date=date, hour=hour,
+                    seat=target,
+                    date=date,
+                    hour=hour,
                     leader_name=leader_name,
                     leader_id=leader_id,
-                    leader_phone=leader_phone  # ✅ 인증 강화
+                    leader_phone=leader_phone
                 ).delete() or 0
         except Exception as e:
             print("❌ 예약 취소 중 오류:", e)
@@ -538,18 +555,20 @@ def cancel_all_confirm():
     db.session.commit()
     total_deleted = group_deleted + personal_deleted
 
-    # 삭제 결과 메시지
     if total_deleted > 0:
         safe_flash(f"✅ 선택한 {total_deleted}개의 예약이 취소되었습니다.")
     else:
         safe_flash("⚠️ 선택된 예약을 찾을 수 없거나 이미 삭제되었습니다.")
 
-    # 최신 예약 목록 다시 조회
     group_reservations = Reservation.query.filter_by(
-        leader_name=leader_name, leader_id=leader_id, leader_phone=leader_phone
+        leader_name=leader_name,
+        leader_id=leader_id,
+        leader_phone=leader_phone
     ).all()
     personal_reservations = PersonalReservation.query.filter_by(
-        leader_name=leader_name, leader_id=leader_id, leader_phone=leader_phone
+        leader_name=leader_name,
+        leader_id=leader_id,
+        leader_phone=leader_phone
     ).all()
 
     return render_template(
@@ -558,9 +577,8 @@ def cancel_all_confirm():
         personal_reservations=personal_reservations,
         leader_name=leader_name,
         leader_id=leader_id,
-        leader_phone=leader_phone  # ✅ 전달
+        leader_phone=leader_phone
     )
-
 @app.route("/cancel_all_result")
 def cancel_all_result():
     return render_template("cancel_all_result.html")
