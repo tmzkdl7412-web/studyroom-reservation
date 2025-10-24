@@ -1,7 +1,0 @@
-v: 0
-micros:
-  - name: studyroom-reservation
-    src: .
-    engine: python3.11
-    primary: true
-    run: gunicorn app:app
