@@ -7,20 +7,17 @@
   <style>
     html, body {
       margin: 0;
+      padding: 0;
       background-color: #f9fafc;
       font-family: "Noto Sans KR", sans-serif;
       overflow-x: hidden;
-      display: flex;
-      flex-direction: column;
-      min-height: 100vh;
     }
 
-    /* ✅ 위·아래 남색 라인 */
+    /* 위아래 남색 라인 */
     .top-bar, .bottom-bar {
       height: 30px;
       width: 100%;
       background: linear-gradient(to right, #001B4E, #003C9E, #001B4E);
-      flex-shrink: 0;
     }
 
     header {
@@ -35,14 +32,14 @@
     }
 
     h3.kor-title {
-      font-size: clamp(20px, 3.5vw, 28px);
+      font-size: clamp(22px, 3.5vw, 28px);
       font-weight: 700;
       margin: 0;
       color: #001B4E;
     }
 
     h1 {
-      font-size: clamp(26px, 5vw, 40px);
+      font-size: clamp(28px, 5vw, 40px);
       font-weight: 800;
       margin: 5px 0 0;
       color: #001B4E;
@@ -50,46 +47,40 @@
     }
 
     main {
-      flex: 1;
       display: flex;
       flex-direction: column;
       align-items: center;
       justify-content: center;
-      padding: 20px 0;
+      padding: 10px 0 30px 0;
     }
 
-    /* 🧭 마스코트 */
+    /* 마스코트 */
     .mascot-wrap {
       display: flex;
       justify-content: center;
       align-items: center;
-      margin-top: -10px;
       margin-bottom: 10px;
     }
 
     img.mascot {
       width: clamp(100px, 25vw, 180px);
       filter: drop-shadow(0 6px 15px rgba(0, 0, 0, 0.15));
-      transition: transform 0.3s ease;
     }
 
-    img.mascot:hover {
-      transform: translateY(-5px);
-    }
-
-    /* ✅ 메인 버튼 */
+    /* 버튼 */
     .button-container {
       display: flex;
       justify-content: center;
       align-items: center;
-      gap: clamp(40px, 10vw, 100px);
-      margin-top: 20px;
-      flex-wrap: wrap;
+      flex-wrap: wrap; /* ✅ Safari fix: 강제 줄바꿈 허용 */
+      gap: 40px;
+      max-width: 95%;
+      margin-top: 10px;
     }
 
     .main-btn {
-      width: clamp(160px, 25vw, 280px);
-      height: clamp(160px, 25vw, 280px);
+      width: clamp(140px, 25vw, 240px);
+      height: clamp(140px, 25vw, 240px);
       border-radius: 50%;
       border: none;
       background-color: #1557c0;
@@ -99,6 +90,7 @@
       cursor: pointer;
       box-shadow: 0 8px 15px rgba(0, 0, 0, 0.1);
       transition: all 0.3s ease;
+      flex-shrink: 0; /* ✅ Safari flex-bug 방지 */
     }
 
     .main-btn:hover {
@@ -108,15 +100,15 @@
 
     footer {
       text-align: center;
-      margin-bottom: 30px;
+      margin-bottom: 20px;
     }
 
     .inquiry-btn {
       color: white;
-      padding: clamp(12px, 2vw, 18px) clamp(20px, 3vw, 30px);
+      padding: 14px 26px;
       border-radius: 30px;
       font-weight: bold;
-      font-size: clamp(14px, 2vw, 18px);
+      font-size: 16px;
       border: none;
       cursor: pointer;
       transition: all 0.2s ease-in-out;
@@ -128,71 +120,36 @@
     }
 
     .btn-green { background-color: #27ae60; }
-    .btn-green:hover { background-color: #219150; }
-
     .btn-blue { background-color: #1565c0; }
-    .btn-blue:hover { background-color: #0d47a1; }
-
     .btn-red { background-color: #c62828; }
+    .btn-yellow { background-color: #FFD700; color: #00205b; }
+
+    .btn-green:hover { background-color: #219150; }
+    .btn-blue:hover { background-color: #0d47a1; }
     .btn-red:hover { background-color: #a92121; }
+    .btn-yellow:hover { background-color: #FFC400; }
 
-    .btn-yellow {
-      background-color: #FFD700;
-      color: #00205b;
-    }
-    .btn-yellow:hover {
-      background-color: #FFC400;
-    }
-
-    /* ✅ 영어 부제 */
     .eng-footer {
       text-align: center;
-      font-size: clamp(10px, 2.2vw, 18px);
+      font-size: 16px;
       color: white;
-      font-weight: 400;
-      letter-spacing: 1px;
       background: #001B4E;
       padding: 10px 0;
+      font-weight: 400;
+      letter-spacing: 1px;
     }
 
-    /* ✅ 모바일 완전 고정 (Safari 포함) */
+    /* ✅ 모바일 강제 column layout (세로로 깔끔하게) */
     @media (max-width: 768px) {
-      header {
-        margin-top: 10px !important;
-      }
-
-      .mascot-wrap {
-        margin-top: 5px !important;
-        margin-bottom: 15px !important;
-      }
-
-      img.mascot {
-        width: 130px !important;
-        margin-bottom: -5px !important;
-      }
-
       .button-container {
-        display: flex !important;
         flex-direction: column !important;
-        align-items: center !important;
-        justify-content: center !important;
         gap: 35px !important;
-        width: 100% !important;
       }
 
       .main-btn {
         width: 180px !important;
         height: 180px !important;
         font-size: 22px !important;
-      }
-
-      footer {
-        margin-bottom: 25px !important;
-      }
-
-      .eng-footer {
-        font-size: 12px !important;
-        padding: 8px 0 !important;
       }
     }
   </style>
