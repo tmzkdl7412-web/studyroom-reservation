@@ -58,29 +58,50 @@
     <input type="hidden" name="leader_name" value="{{ leader_name }}">
     <input type="hidden" name="leader_id" value="{{ leader_id }}">
 
+    <!-- 전화번호 입력 추가 -->
+    <div style="text-align:center; margin-bottom:20px;">
+      <label style="font-weight:600; color:#0d47a1;">전화번호 입력 (본인 확인)</label><br>
+      <input type="text" name="leader_phone" placeholder="예: 010-1234-5678" required
+             style="padding:8px; border-radius:8px; border:1px solid #ccc; width:200px; font-size:14px;">
+    </div>
+
     {% if group_reservations %}
-    <h3 style="text-align:center; color:#0d47a1;">📘 단체실 예약</h3>
-    <table>
-      <tr><th>선택</th><th>프로젝트실</th><th>날짜</th><th>시간</th></tr>
-      {% for r in group_reservations %}
-      <tr>
-        <td><input type="checkbox" name="selected" value="group_{{r.room}}_{{r.date}}_{{r.hour}}"></td>
-        <td>{{ r.room }}</td>
-        <td>{{ r.date }}</td>
-        <td>{{ r.hour }}시 ~ {{ r.hour | int + r.duration | int }}시</td>
-      </tr>
-      {% endfor %}
-    </table>
+      <h3 style="text-align:center; color:#0d47a1;">📘 단체실 예약</h3>
+      <table>
+        <tr><th>선택</th><th>프로젝트실</th><th>날짜</th><th>시간</th></tr>
+        {% for r in group_reservations %}
+          <tr>
+            <td><input type="checkbox" name="selected" value="group_{{r.room}}_{{r.date}}_{{r.hour}}"></td>
+            <td>{{ r.room }}</td>
+            <td>{{ r.date }}</td>
+            <td>{{ r.hour }}시 ~ {{ r.hour | int + r.duration | int }}시</td>
+          </tr>
+        {% endfor %}
+      </table>
     {% endif %}
 
     {% if personal_reservations %}
-    <h3 style="text-align:center; color:#0d47a1;">🪑 개인석 예약</h3>
-    <table>
-      <tr><th>선택</th><th>좌석</th><th>날짜</th><th>시간</th></tr>
-      {% for r in personal_reservations %}
-      <tr>
-        <td><input type="checkbox" name="selected" value="personal_{{r.seat}}_{{r.date}}_{{r.hour}}"></td>
-        <td>{{ r.seat }}</td>
-        <td>{{ r.date }}</td>
-        <td>{{ r.hour }}시 ~ {{ r.hour | int + r.duration | int }}시</td>
-      </t
+      <h3 style="text-align:center; color:#0d47a1;">🪑 개인석 예약</h3>
+      <table>
+        <tr><th>선택</th><th>좌석</th><th>날짜</th><th>시간</th></tr>
+        {% for r in personal_reservations %}
+          <tr>
+            <td><input type="checkbox" name="selected" value="personal_{{r.seat}}_{{r.date}}_{{r.hour}}"></td>
+            <td>{{ r.seat }}</td>
+            <td>{{ r.date }}</td>
+            <td>{{ r.hour }}시 ~ {{ r.hour | int + r.duration | int }}시</td>
+          </tr>
+        {% endfor %}
+      </table>
+    {% endif %}
+
+    <div style="text-align:center;">
+      <button type="submit">선택한 예약 취소</button>
+    </div>
+  </form>
+
+  {% if not group_reservations and not personal_reservations %}
+    <p class="msg">예약 내역이 없습니다.</p>
+  {% endif %}
+</body>
+</html>
