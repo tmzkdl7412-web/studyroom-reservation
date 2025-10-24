@@ -15,7 +15,7 @@
         color: #001B4E;
       }
 
-      /* 상하 남색 라인 (고정) */
+      /* 상하 남색 라인 */
       body::before, body::after {
         content: "";
         height: 30px;
@@ -28,14 +28,16 @@
       body::before { top: 0; }
       body::after { bottom: 0; }
 
-      /* 페이지 중앙 컨테이너 */
+      /* 페이지 전체 컨테이너 */
       .page {
         max-width: 1200px;
         margin: 0 auto;
-        padding: 80px 24px 120px;
+        padding: 40px 24px 100px; /* 위쪽/아래쪽 간격 줄임 */
         display: flex;
         flex-direction: column;
         align-items: center;
+        position: relative;
+        top: -40px; /* ✅ 전체 영역 위로 이동 */
       }
 
       header {
@@ -83,7 +85,7 @@
         flex-direction: column;
         align-items: center;
         gap: 36px;
-        margin-top: 0px;
+        margin-top: 0;
       }
 
       /* 상단 큰 버튼 (단체석 / 개인석) */
@@ -92,6 +94,7 @@
         justify-content: center;
         gap: 80px;
         flex-wrap: wrap;
+        margin-top: -20px; /* ✅ 위로 살짝 올림 */
       }
 
       .big-buttons a {
@@ -139,6 +142,7 @@
         flex-wrap: wrap;
         justify-content: center;
         gap: 30px;
+        margin-top: -10px; /* ✅ 전체 위로 올림 */
       }
 
       .small-buttons a {
@@ -195,20 +199,23 @@
       /* ✅ 모바일 버전 전용 */
       @media (max-width: 768px) {
         header img.logo { width: 240px; }
-        h1 { font-size: 28px; }
-        h3.kor-title { font-size: 22px; }
+        h3.kor-title { font-size: 28px; }  /* ✅ 글씨 키움 */
+        h1 { font-size: 36px; }           /* ✅ 글씨 키움 */
         img.mascot { width: 140px; }
 
+        .page { top: -50px; } /* ✅ 전체 위로 올림 */
+
         .button-section {
-          gap: 28px;
-          margin-top: 60px;
+          gap: 24px;
+          margin-top: 40px;
         }
 
-        /* ✅ big-buttons: 모바일에서 가로 2개 정렬 */
+        /* 단체석/개인석 가로 정렬 유지 */
         .big-buttons {
           flex-direction: row;
           justify-content: center;
-          gap: 30px;
+          gap: 28px;
+          margin-top: -20px;
         }
 
         .big-buttons a {
@@ -217,14 +224,14 @@
           font-size: 20px;
         }
 
-        /* ✅ small-buttons 크기 줄임 */
+        /* 작은 버튼 */
         .small-buttons a {
           width: 100px;
           height: 40px;
           font-size: 14px;
         }
 
-        /* ✅ 영어 푸터 조정 */
+        /* 영어 푸터 */
         .eng-footer {
           font-size: 12px;
           bottom: 6px;
@@ -246,27 +253,23 @@
         <img src="{{ url_for('static', filename='wow.png') }}" alt="학과 마스코트" class="mascot" />
       </div>
 
-      <!-- 버튼 영역 전체 -->
       <div class="button-section">
-
-        <!-- 큰 버튼 (단체석 / 개인석) -->
+        <!-- 큰 버튼 -->
         <div class="big-buttons">
           <a href="{{ url_for('room_detail') }}?room=1">단체석</a>
           <a href="{{ url_for('personal_detail') }}?seat=1">개인석</a>
         </div>
 
-        <!-- 작은 버튼들 (하단 기능 버튼) -->
+        <!-- 작은 버튼 -->
         <div class="small-buttons">
           <a href="{{ url_for('contact') }}" class="green">문의사항</a>
           <a href="http://203.249.68.52/" target="_blank" class="blue">냉/난방</a>
           <a href="{{ url_for('cancel_all') }}" class="red">예약 취소</a>
           <a href="{{ url_for('extend_page') }}" class="yellow">시간 연장</a>
         </div>
-
       </div>
     </div>
 
-    <!-- 영어 문구 -->
     <div class="eng-footer">Industrial &amp; Data Engineering, Hongik University</div>
   </body>
 </html>
