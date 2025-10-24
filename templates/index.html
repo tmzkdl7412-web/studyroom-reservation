@@ -13,7 +13,6 @@
       overflow-x: hidden;
     }
 
-    /* 위아래 남색 라인 */
     .top-bar, .bottom-bar {
       height: 30px;
       width: 100%;
@@ -54,7 +53,6 @@
       padding: 10px 0 30px 0;
     }
 
-    /* 마스코트 */
     .mascot-wrap {
       display: flex;
       justify-content: center;
@@ -67,30 +65,31 @@
       filter: drop-shadow(0 6px 15px rgba(0, 0, 0, 0.15));
     }
 
-    /* 버튼 */
+    /* ✅ 버튼 영역 */
     .button-container {
       display: flex;
       justify-content: center;
       align-items: center;
-      flex-wrap: wrap; /* ✅ Safari fix: 강제 줄바꿈 허용 */
-      gap: 40px;
-      max-width: 95%;
-      margin-top: 10px;
+      gap: 60px;
+      flex-wrap: nowrap;
+      margin-top: 15px;
     }
 
+    /* ✅ a태그를 버튼처럼 */
     .main-btn {
-      width: clamp(140px, 25vw, 240px);
-      height: clamp(140px, 25vw, 240px);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      width: clamp(160px, 25vw, 260px);
+      height: clamp(160px, 25vw, 260px);
       border-radius: 50%;
-      border: none;
       background-color: #1557c0;
       color: white;
       font-size: clamp(18px, 2vw, 26px);
       font-weight: bold;
-      cursor: pointer;
+      text-decoration: none;
       box-shadow: 0 8px 15px rgba(0, 0, 0, 0.1);
       transition: all 0.3s ease;
-      flex-shrink: 0; /* ✅ Safari flex-bug 방지 */
     }
 
     .main-btn:hover {
@@ -139,17 +138,17 @@
       letter-spacing: 1px;
     }
 
-    /* ✅ 모바일 강제 column layout (세로로 깔끔하게) */
+    /* ✅ 모바일에서만 세로 정렬 */
     @media (max-width: 768px) {
       .button-container {
-        flex-direction: column !important;
-        gap: 35px !important;
+        flex-direction: column;
+        gap: 40px;
       }
 
       .main-btn {
-        width: 180px !important;
-        height: 180px !important;
-        font-size: 22px !important;
+        width: 180px;
+        height: 180px;
+        font-size: 22px;
       }
     }
   </style>
@@ -170,12 +169,8 @@
     </div>
 
     <div class="button-container">
-      <a href="{{ url_for('room_detail') }}?room=1">
-        <button class="main-btn">단체석</button>
-      </a>
-      <a href="{{ url_for('personal_detail') }}?seat=1">
-        <button class="main-btn">개인석</button>
-      </a>
+      <a href="{{ url_for('room_detail') }}?room=1" class="main-btn">단체석</a>
+      <a href="{{ url_for('personal_detail') }}?seat=1" class="main-btn">개인석</a>
     </div>
   </main>
 
