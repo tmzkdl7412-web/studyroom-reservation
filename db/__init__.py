@@ -1,3 +1,4 @@
+# db/__init__.py
 import os
 from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
@@ -5,34 +6,30 @@ from flask_sqlalchemy import SQLAlchemy
 db = SQLAlchemy()
 
 def create_app():
-    BASE_DIR = os.path.abspath(os.path.dirname(__file__))     # .../db
-    PROJECT_ROOT = os.path.abspath(os.path.join(BASE_DIR, '..'))  # 프로젝트 루트
-    DB_PATH = os.path.join(PROJECT_ROOT, 'studyroom.db')      # 로컬 개발용 SQLite 경로
-
-    app = Flask(__name__,
-        static_folder=os.path.join(PROJECT_ROOT, 'static'),
-        template_folder=os.path.join(PROJECT_ROOT, 'templates'))
-
-    app.secret_key = "supersecretkey"   # ✅ flash(), session 등에 필수
-
-    # ✅ PostgreSQL 우선, 없으면 로컬 SQLite 사용
-    app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv(
-        "DATABASE_URL",
-        f"sqlite:///{DB_PATH}"
+    # ✅ Flask 앱 생성 (templates, static 폴더 경로 명시)
+    app = Flask(
+        __name__,
+        template_folder="../templates",  # 상위 폴더의 templates 인식
+        static_folder="../static"        # 상위 폴더의 static 인식
     )
-    app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
+    # ✅ PostgreSQL URI 설정
+    app.config["SQLALCHEMY_DATABASE_URI"] = (
+        "postgresql://studyroom_db_tcbr_user:"
+        "pWMguz9gtllDmvSAjCLkL4avcugRd0kC@"
+        "dpg-d3tu7nje5dus73999eb0-a.oregon-postgres.render.com/"
+        "studyroom_db_tcbr"
+    )
+
+    app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
+    app.secret_key = "studyroom-secret-key"
+
+    # ✅ DB 초기화
     db.init_app(app)
 
-    # 모델 import
-    from . import models
-
-    # ✅ DB 자동 초기화 (PostgreSQL/SQLite 모두)
+    # ✅ 테이블 자동 생성
     with app.app_context():
-        try:
-            db.create_all()
-            print("✅ 데이터베이스 연결 및 테이블 확인 완료")
-        except Exception as e:
-            print("❌ 데이터베이스 초기화 중 오류:", e)
+        from db import models  # 모델 import
+        db.create_all()
 
     return app
