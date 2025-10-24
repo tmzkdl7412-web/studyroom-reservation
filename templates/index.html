@@ -16,7 +16,7 @@
       }
 
       /* 상하 남색 라인 (고정) */
-      body::before, body::after{
+      body::before, body::after {
         content: "";
         height: 30px;
         width: 100%;
@@ -26,7 +26,7 @@
         z-index: 9999;
       }
       body::before { top: 0; }
-      body::after  { bottom: 0; }
+      body::after { bottom: 0; }
 
       /* 페이지 중앙 컨테이너 */
       .page {
@@ -192,6 +192,7 @@
         }
       }
 
+      /* ✅ 모바일 버전 전용 */
       @media (max-width: 768px) {
         header img.logo { width: 240px; }
         h1 { font-size: 28px; }
@@ -202,9 +203,32 @@
           gap: 28px;
           margin-top: 60px;
         }
+
+        /* ✅ big-buttons: 모바일에서 가로 2개 정렬 */
         .big-buttons {
-          flex-direction: column;
-          gap: 20px;
+          flex-direction: row;
+          justify-content: center;
+          gap: 30px;
+        }
+
+        .big-buttons a {
+          width: 150px;
+          height: 150px;
+          font-size: 20px;
+        }
+
+        /* ✅ small-buttons 크기 줄임 */
+        .small-buttons a {
+          width: 100px;
+          height: 40px;
+          font-size: 14px;
+        }
+
+        /* ✅ 영어 푸터 조정 */
+        .eng-footer {
+          font-size: 12px;
+          bottom: 6px;
+          white-space: nowrap;
         }
       }
     </style>
@@ -242,6 +266,7 @@
       </div>
     </div>
 
+    <!-- 영어 문구 -->
     <div class="eng-footer">Industrial &amp; Data Engineering, Hongik University</div>
   </body>
 </html>
