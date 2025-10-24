@@ -15,8 +15,8 @@
         color: #001B4E;
       }
 
-      /* 상하 남색 라인 */
-      body::before, body::after {
+      /* 상하 남색 라인 (고정) */
+      body::before, body::after{
         content: "";
         height: 30px;
         width: 100%;
@@ -26,18 +26,16 @@
         z-index: 9999;
       }
       body::before { top: 0; }
-      body::after { bottom: 0; }
+      body::after  { bottom: 0; }
 
-      /* 페이지 전체 컨테이너 */
+      /* 페이지 중앙 컨테이너 */
       .page {
         max-width: 1200px;
         margin: 0 auto;
-        padding: 40px 24px 100px; /* 위쪽/아래쪽 간격 줄임 */
+        padding: 80px 24px 120px;
         display: flex;
         flex-direction: column;
         align-items: center;
-        position: relative;
-        top: -40px; /* ✅ 전체 영역 위로 이동 */
       }
 
       header {
@@ -85,7 +83,7 @@
         flex-direction: column;
         align-items: center;
         gap: 36px;
-        margin-top: 0;
+        margin-top: 0px;
       }
 
       /* 상단 큰 버튼 (단체석 / 개인석) */
@@ -94,7 +92,6 @@
         justify-content: center;
         gap: 80px;
         flex-wrap: wrap;
-        margin-top: -20px; /* ✅ 위로 살짝 올림 */
       }
 
       .big-buttons a {
@@ -142,7 +139,6 @@
         flex-wrap: wrap;
         justify-content: center;
         gap: 30px;
-        margin-top: -10px; /* ✅ 전체 위로 올림 */
       }
 
       .small-buttons a {
@@ -182,40 +178,20 @@
         pointer-events: none;
       }
 
-      /* 반응형 */
-      @media (max-width: 980px) {
-        .big-buttons a {
-          width: 180px;
-          height: 180px;
-          font-size: 22px;
-        }
-        .small-buttons a {
-          width: 110px;
-          height: 44px;
-          font-size: 15px;
-        }
-      }
-
-      /* ✅ 모바일 버전 전용 */
+      /* ✅ 반응형 (모바일만 변경, 웹은 그대로 유지) */
       @media (max-width: 768px) {
         header img.logo { width: 240px; }
-        h3.kor-title { font-size: 28px; }  /* ✅ 글씨 키움 */
-        h1 { font-size: 36px; }           /* ✅ 글씨 키움 */
+        h3.kor-title { font-size: 30px; }  /* 글씨 살짝 키움 */
+        h1 { font-size: 38px; }            /* 글씨 살짝 키움 */
         img.mascot { width: 140px; }
 
-        .page { top: -50px; } /* ✅ 전체 위로 올림 */
+        .button-section { gap: 24px; }
 
-        .button-section {
-          gap: 24px;
-          margin-top: 40px;
-        }
-
-        /* 단체석/개인석 가로 정렬 유지 */
+        /* ✅ 단체석/개인석 가로 정렬 */
         .big-buttons {
           flex-direction: row;
           justify-content: center;
           gap: 28px;
-          margin-top: -20px;
         }
 
         .big-buttons a {
@@ -224,14 +200,13 @@
           font-size: 20px;
         }
 
-        /* 작은 버튼 */
         .small-buttons a {
           width: 100px;
           height: 40px;
           font-size: 14px;
         }
 
-        /* 영어 푸터 */
+        /* ✅ 영어 푸터 */
         .eng-footer {
           font-size: 12px;
           bottom: 6px;
@@ -253,7 +228,9 @@
         <img src="{{ url_for('static', filename='wow.png') }}" alt="학과 마스코트" class="mascot" />
       </div>
 
+      <!-- 버튼 전체 -->
       <div class="button-section">
+
         <!-- 큰 버튼 -->
         <div class="big-buttons">
           <a href="{{ url_for('room_detail') }}?room=1">단체석</a>
@@ -267,6 +244,7 @@
           <a href="{{ url_for('cancel_all') }}" class="red">예약 취소</a>
           <a href="{{ url_for('extend_page') }}" class="yellow">시간 연장</a>
         </div>
+
       </div>
     </div>
 
