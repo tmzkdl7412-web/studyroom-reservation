@@ -1,241 +1,221 @@
 <!DOCTYPE html>
 <html lang="ko">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>산업·데이터공학과 스터디룸 예약</title>
-    <style>
-      html, body {
-        height: 100%;
-        margin: 0;
-        background-color: #f9fafc;
-        font-family: "Noto Sans KR", sans-serif;
-        overflow-x: hidden;
-        display: flex;
-        flex-direction: column;
-      }
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>산업·데이터공학과 스터디룸 예약</title>
+  <style>
+    html, body {
+      height: 100%;
+      margin: 0;
+      background-color: #f9fafc;
+      font-family: "Noto Sans KR", sans-serif;
+      overflow-x: hidden;
+      display: flex;
+      flex-direction: column;
+    }
 
-      /* ✅ 위·아래 남색 라인 */
-      body::before,
-      body::after {
-        content: "";
-        height: 30px;
-        width: 100%;
-        background: linear-gradient(to right, #001B4E, #003C9E, #001B4E);
-        position: fixed;
-        left: 0;
-        z-index: 9999;
-      }
-      body::before { top: 0; }
-      body::after { bottom: 0; }
+    /* ✅ 위·아래 남색 라인 */
+    body::before,
+    body::after {
+      content: "";
+      height: 30px;
+      width: 100%;
+      background: linear-gradient(to right, #001B4E, #003C9E, #001B4E);
+      position: fixed;
+      left: 0;
+      z-index: 9999;
+    }
+    body::before { top: 0; }
+    body::after { bottom: 0; }
 
-      header {
-        text-align: center;
-        color: #001B4E;
-        margin-top: 60px;
-      }
+    header {
+      text-align: center;
+      color: #001B4E;
+      margin-top: 70px;
+    }
 
-      header img.logo {
-        width: 300px;
-        margin-bottom: 20px;
-      }
+    header img.logo {
+      width: clamp(180px, 40vw, 300px);
+      margin-bottom: 20px;
+    }
 
-      /* ✅ 산업데이터공학과 + 스터디룸 예약 (고정) */
-      h1 {
-        font-size: 40px;
-        font-weight: 800;
-        margin: 5px 0 0;
-        color: #001B4E;
-        line-height: 1.3;
-      }
+    h3.kor-title {
+      font-size: clamp(20px, 3.5vw, 28px);
+      font-weight: 700;
+      margin: 0;
+      color: #001B4E;
+    }
 
-      h3.kor-title {
-        font-size: 60px;
-        font-weight: 700;
-        margin: 0;
-        color: #001B4E;
-      }
+    h1 {
+      font-size: clamp(26px, 5vw, 40px);
+      font-weight: 800;
+      margin: 5px 0 0;
+      color: #001B4E;
+      line-height: 1.3;
+    }
 
-      main {
-        flex: 1;
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        justify-content: center;
-      }
+    main {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      margin-top: 10px;
+    }
 
-      /* 🧭 마스코트 */
-      .mascot-wrap {
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        margin-top: -10px;
-        margin-bottom: -100px;
-      }
+    /* 🧭 마스코트 */
+    .mascot-wrap {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      margin-top: -20px;
+      margin-bottom: -60px;
+    }
 
-      img.mascot {
-        width: 180px;
-        filter: drop-shadow(0 6px 15px rgba(0, 0, 0, 0.15));
-        transition: transform 0.3s ease;
-      }
+    img.mascot {
+      width: clamp(100px, 25vw, 180px);
+      filter: drop-shadow(0 6px 15px rgba(0, 0, 0, 0.15));
+      transition: transform 0.3s ease;
+    }
 
-      img.mascot:hover {
-        transform: translateY(-5px);
-      }
+    img.mascot:hover {
+      transform: translateY(-5px);
+    }
 
-      /* ✅ 메인 버튼 */
-      .button-container {
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        gap: 100px;
-        margin-top: 10px;
-      }
+    /* ✅ 메인 버튼 */
+    .button-container {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: clamp(40px, 10vw, 100px);
+      margin-top: 20px;
+      flex-wrap: wrap;
+    }
 
-      .main-btn {
-        width: 280px;
-        height: 280px;
-        border-radius: 50%;
-        border: none;
-        background-color: #1557c0;
-        color: white;
-        font-size: 26px;
-        font-weight: bold;
-        cursor: pointer;
-        box-shadow: 0 8px 15px rgba(0, 0, 0, 0.1);
-        transition: all 0.3s ease;
-      }
+    .main-btn {
+      width: clamp(160px, 25vw, 280px);
+      height: clamp(160px, 25vw, 280px);
+      border-radius: 50%;
+      border: none;
+      background-color: #1557c0;
+      color: white;
+      font-size: clamp(18px, 2vw, 26px);
+      font-weight: bold;
+      cursor: pointer;
+      box-shadow: 0 8px 15px rgba(0, 0, 0, 0.1);
+      transition: all 0.3s ease;
+    }
 
-      .main-btn:hover {
-        background-color: #0f58b3;
-        transform: translateY(-6px);
-      }
+    .main-btn:hover {
+      background-color: #0f58b3;
+      transform: translateY(-6px);
+    }
 
-      footer {
-        text-align: center;
-        margin-bottom: 70px;
-      }
+    footer {
+      text-align: center;
+      margin-bottom: 70px;
+    }
 
-      .inquiry-btn {
-        color: white;
-        padding: 18px 30px;
-        border-radius: 30px;
-        font-weight: bold;
-        font-size: 18px;
-        border: none;
-        cursor: pointer;
-        transition: all 0.2s ease-in-out;
-        margin-top: -10px;
-      }
+    .inquiry-btn {
+      color: white;
+      padding: clamp(12px, 2vw, 18px) clamp(20px, 3vw, 30px);
+      border-radius: 30px;
+      font-weight: bold;
+      font-size: clamp(14px, 2vw, 18px);
+      border: none;
+      cursor: pointer;
+      transition: all 0.2s ease-in-out;
+      margin-top: -10px;
+    }
 
-      .inquiry-btn:hover {
-        transform: scale(1.1);
-      }
+    .inquiry-btn:hover {
+      transform: scale(1.08);
+    }
 
-      .btn-green { background-color: #27ae60; }
-      .btn-green:hover { background-color: #219150; }
+    .btn-green { background-color: #27ae60; }
+    .btn-green:hover { background-color: #219150; }
 
-      .btn-blue { background-color: #1565c0; }
-      .btn-blue:hover { background-color: #0d47a1; }
+    .btn-blue { background-color: #1565c0; }
+    .btn-blue:hover { background-color: #0d47a1; }
 
-      .btn-red { background-color: #c62828; }
-      .btn-red:hover { background-color: #a92121; }
+    .btn-red { background-color: #c62828; }
+    .btn-red:hover { background-color: #a92121; }
 
-      .btn-yellow {
-        background-color: #FFD700;
-        color: #00205b;
-      }
-      .btn-yellow:hover {
-        background-color: #FFC400;
-      }
+    .btn-yellow {
+      background-color: #FFD700;
+      color: #00205b;
+    }
+    .btn-yellow:hover {
+      background-color: #FFC400;
+    }
 
-      /* ✅ 영어 부제: 맨 밑 고정 */
-        .eng-footer {
-  position: fixed;
-  bottom: 1px; /* 남색 라인 위쪽 여백 */
-  left: 0;
-  width: 100%;
-  text-align: center;
-  font-size: 20px;
-  color: white; /* 남색 라인 위에서 하얀색으로 보이게 */
-  font-weight: 400;
-  letter-spacing: 1px;
-  z-index: 10000;
-}
+    /* ✅ 영어 부제: 맨 밑 고정 */
+    .eng-footer {
+      position: fixed;
+      bottom: 2px;
+      left: 0;
+      width: 100%;
+      text-align: center;
+      font-size: clamp(10px, 2.2vw, 18px);
+      color: white;
+      font-weight: 400;
+      letter-spacing: 1px;
+      z-index: 10000;
+    }
 
+    /* ✅ 모바일 반응형 */
+    @media (max-width: 768px) {
+      header { margin-top: 60px; }
+      .mascot-wrap { margin-top: 0; margin-bottom: -40px; }
+      .button-container { flex-direction: column; gap: 35px; }
+      footer { margin-bottom: 50px; }
+      .eng-footer { font-size: 12px; bottom: 5px; }
+    }
+  </style>
+</head>
 
-      @media (max-width: 768px) {
-        header img.logo { width: 250px; }
-        h1 { font-size: 36px; }
-        h3.kor-title { font-size: 22px; }
-        .mascot-wrap { margin-top: -10px; }
-        img.mascot { width: 130px; }
-        .button-container {
-          flex-direction: column;
-          gap: 40px;
-        }
-        .main-btn {
-          width: 180px;
-          height: 180px;
-          font-size: 22px;
-        }
-        .eng-footer {
-          font-size: 15px;
-        }
-      }
-    </style>
-  </head>
+<body>
+  <header>
+    <img src="{{ url_for('static', filename='hongik_logo.png') }}" alt="홍익대학교 로고" class="logo" />
+    <h3 class="kor-title">산업·데이터공학과</h3>
+    <h1>스터디룸 예약</h1>
+  </header>
 
-  <body>
-    <header>
-      <img
-        src="{{ url_for('static', filename='hongik_logo.png') }}"
-        alt="홍익대학교 로고"
-        class="logo"
-      />
-      <h3 class="kor-title">산업·데이터공학과</h3>
-      <h1>스터디룸 예약</h1>
-    </header>
+  <main>
+    <div class="mascot-wrap">
+      <img src="{{ url_for('static', filename='wow.png') }}" alt="학과 마스코트" class="mascot" />
+    </div>
 
-    <main>
-      <div class="mascot-wrap">
-        <img
-          src="{{ url_for('static', filename='wow.png') }}"
-          alt="학과 마스코트"
-          class="mascot"
-        />
-      </div>
+    <div class="button-container">
+      <a href="{{ url_for('room_detail') }}?room=1">
+        <button class="main-btn">단체석</button>
+      </a>
+      <a href="{{ url_for('personal_detail') }}?seat=1">
+        <button class="main-btn">개인석</button>
+      </a>
+    </div>
+  </main>
 
-      <div class="button-container">
-        <a href="{{ url_for('room_detail') }}?room=1">
-          <button class="main-btn">단체석</button>
-        </a>
-        <a href="{{ url_for('personal_detail') }}?seat=1">
-          <button class="main-btn">개인석</button>
-        </a>
-      </div>
-    </main>
+  <footer>
+    <div style="display:flex; flex-wrap:wrap; gap:14px; justify-content:center;">
+      <a href="{{ url_for('contact') }}">
+        <button class="inquiry-btn btn-green">문의사항</button>
+      </a>
+      <a href="http://203.249.68.52/" target="_blank">
+        <button class="inquiry-btn btn-blue">냉/난방</button>
+      </a>
+      <a href="{{ url_for('cancel_all') }}">
+        <button class="inquiry-btn btn-red">예약 취소</button>
+      </a>
+      <a href="{{ url_for('extend_page') }}">
+        <button class="inquiry-btn btn-yellow">시간 연장</button>
+      </a>
+    </div>
 
-    <footer>
-      <div style="display:flex; gap:16px; justify-content:center;">
-        <a href="{{ url_for('contact') }}">
-          <button class="inquiry-btn btn-green">문의사항</button>
-        </a>
-        <a href="http://203.249.68.52/" target="_blank">
-          <button class="inquiry-btn btn-blue">냉/난방</button>
-        </a>
-        <a href="{{ url_for('cancel_all') }}">
-          <button class="inquiry-btn btn-red">예약 취소</button>
-        </a>
-        <a href="{{ url_for('extend_page') }}">
-          <button class="inquiry-btn btn-yellow">시간 연장</button>
-        </a>
-      </div>
-
-      <!-- ✅ 영어 문구 맨 밑 -->
-      <div class="eng-footer">
-        Industrial & Data Engineering, Hongik University
-      </div>
-    </footer>
-  </body>
+    <div class="eng-footer">
+      Industrial & Data Engineering, Hongik University
+    </div>
+  </footer>
+</body>
 </html>
