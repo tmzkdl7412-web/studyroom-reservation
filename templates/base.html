@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>{% block title %}산업·데이터공학과 스터디룸 예약{% endblock %}</title>
+
+  <style>
+    body {
+      font-family: "Noto Sans KR", sans-serif;
+      background-color: #f9fafc;
+      margin: 0;
+      padding: 0;
+      min-height: 100vh;
+      position: relative;
+    }
+
+    /* 상단 & 하단 남색 라인 */
+    body::before,
+    body::after {
+      content: "";
+      display: block;
+      height: 8px;
+      background: linear-gradient(to right, #001B4E, #002C7A, #001B4E);
+      position: fixed;
+      left: 0;
+      width: 100%;
+      z-index: 9999;
+    }
+
+    body::before {
+      top: 0;
+    }
+
+    body::after {
+      bottom: 0;
+    }
+
+    header {
+      background-color: #001B4E;
+      color: #fff;
+      padding: 24px 0;
+      text-align: center;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
+      letter-spacing: 0.5px;
+    }
+
+    header h1 {
+      margin: 0;
+      font-size: 28px;
+      font-weight: 700;
+    }
+
+    .container {
+      width: 95%;
+      max-width: 1000px;
+      margin: 50px auto;
+      background: white;
+      border-radius: 14px;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+      padding: 45px 50px;
+    }
+
+    h2 {
+      color: #001B4E;
+      margin-bottom: 24px;
+      text-align: center;
+      font-weight: 700;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 10px;
+    }
+
+    th, td {
+      border: 1px solid #ddd;
+      padding: 10px;
+      text-align: center;
+      font-size: 15px;
+    }
+
+    th {
+      background-color: #f0f4f8;
+      color: #001B4E;
+    }
+
+    .reserved {
+      background-color: #ccc;
+      color: #555;
+      border: none;
+      border-radius: 8px;
+      padding: 8px 14px;
+      cursor: not-allowed;
+    }
+
+    .available {
+      background-color: #002C7A;
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      padding: 8px 14px;
+      cursor: pointer;
+      transition: 0.2s;
+    }
+
+    .available:hover {
+      background-color: #001B4E;
+      transform: translateY(-2px);
+    }
+
+    footer {
+      text-align: center;
+      padding: 25px 0;
+      color: white;
+      font-size: 14px;
+      background-color: #001B4E;
+      margin-top: 60px;
+      letter-spacing: 0.3px;
+    }
+
+    /* 버튼 공통 */
+    .btn-primary {
+      background-color: #002C7A;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      padding: 10px 20px;
+      cursor: pointer;
+      font-weight: bold;
+      text-decoration: none;
+    }
+
+    .btn-secondary {
+      background-color: #ccc;
+      color: #333;
+      border: none;
+      border-radius: 8px;
+      padding: 10px 20px;
+      cursor: pointer;
+      font-weight: bold;
+      text-decoration: none;
+    }
+
+    .btn-primary:hover {
+      background-color: #001B4E;
+    }
+
+    .btn-secondary:hover {
+      background-color: #b3b3b3;
+    }
+  </style>
+</head>
+
+<body>
+  <header>
+    <h1>산업·데이터공학과 스터디룸 예약 시스템</h1>
+  </header>
+
+  <div class="container">
+    {% block content %}
+    {% endblock %}
+  </div>
+
+  <footer>
+    ⓒ 2025 Hongik Univ. Industrial & Data Engineering Dept.
+  </footer>
+</body>
+</html>

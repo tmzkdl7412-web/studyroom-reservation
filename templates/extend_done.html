@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <title>✅ 연장 완료</title>
+  <style>
+    body {
+      font-family: 'Noto Sans KR', sans-serif;
+      background: #f7f9fc;
+      margin: 0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+    }
+    .card {
+      background: white;
+      padding: 40px 60px;
+      border-radius: 20px;
+      box-shadow: 0 4px 16px rgba(0,0,0,0.08);
+      text-align: center;
+      width: 420px;
+    }
+    h1 {
+      font-size: 26px;
+      color: #00205B;
+      margin-bottom: 10px;
+    }
+    p {
+      color: #555;
+      font-size: 16px;
+      line-height: 1.6;
+    }
+    .info {
+      background: #eef4ff;
+      padding: 14px;
+      border-radius: 10px;
+      margin: 20px 0;
+      font-weight: 600;
+      color: #00205B;
+    }
+    .btns {
+      margin-top: 30px;
+    }
+    a {
+      display: inline-block;
+      text-decoration: none;
+      background: #00205B;
+      color: white;
+      padding: 12px 26px;
+      border-radius: 10px;
+      font-weight: bold;
+      transition: 0.2s;
+    }
+    a:hover {
+      background: #0038A8;
+    }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <h1>✅ 연장이 완료되었습니다!</h1>
+    <div class="info">
+      {{ res.date }} {{ res.hour }}시부터 {{ int(res.duration) }}시간 사용 중입니다.<br>
+      이번에 <strong>{{ extend_hours }}</strong>시간 연장되었습니다.
+    </div>
+    <p>
+      이용해주셔서 감사합니다.<br>
+      추가 연장은 종료 20분 전부터 다시 가능합니다.
+    </p>
+    <div class="btns">
+      {% if hasattr(res, 'room') %}
+      <a href="/room_detail?room={{ res.room }}">📅 예약 현황 보기</a>
+      {% else %}
+      <a href="/personal_detail?seat={{ res.seat }}">📅 좌석 현황 보기</a>
+      {% endif %}
+      <a href="/">🏠 홈으로 돌아가기</a>
+    </div>
+  </div>
+</body>
+</html>

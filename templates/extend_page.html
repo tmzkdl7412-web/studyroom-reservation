@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <title>시간 연장</title>
+  <style>
+    body {
+      font-family: 'Noto Sans KR', sans-serif;
+      background-color: #f7f9fc;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      margin: 0;
+    }
+    .container {
+      background: white;
+      padding: 40px 50px;
+      border-radius: 16px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+      text-align: center;
+      width: 420px;
+    }
+    h2 { color: #0d47a1; margin-bottom: 20px; }
+    label {
+      display: block;
+      margin: 12px 0 6px;
+      text-align: left;
+      font-weight: 600;
+      color: #333;
+    }
+    input {
+      width: 100%;
+      padding: 10px;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+      font-size: 14px;
+    }
+    button {
+      margin-top: 20px;
+      background: #1976d2;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      padding: 10px 0;
+      width: 100%;
+      font-weight: bold;
+      font-size: 15px;
+      cursor: pointer;
+      transition: 0.2s;
+    }
+    button:hover { background: #0d47a1; }
+    .back {
+      display: block;
+      margin-top: 15px;
+      color: #1976d2;
+      text-decoration: none;
+      font-size: 14px;
+    }
+    .back:hover { text-decoration: underline; }
+    .alert { color: #d32f2f; margin-bottom: 10px; font-weight: 600; }
+    .success { color: #2e7d32; margin-bottom: 10px; font-weight: 600; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h2>시간 연장</h2>
+
+    {% with messages = get_flashed_messages() %}
+      {% if messages %}
+        <ul style="list-style:none; padding:0;">
+          {% for msg in messages %}
+            <li style="color:red; font-weight:600;">{{ msg|safe }}</li>
+          {% endfor %}
+        </ul>
+      {% endif %}
+    {% endwith %}
+
+    <form method="POST" action="/extend_page">
+      <label>이름</label>
+      <input type="text" name="leader_name" placeholder="예: 김산데" required>
+
+      <label>학번</label>
+      <input type="text" name="leader_id" placeholder="예: A123456" required>
+
+      <button type="submit">연장 가능한 예약 찾기</button>
+    </form>
+
+    <a href="{{ url_for('index') }}" class="back">← 메인으로</a>
+  </div>
+</body>
+</html>
