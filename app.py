@@ -31,17 +31,11 @@ def safe_flash(message, category=None):
 def index():
     return render_template("index.html")
 
-@app.route("/group")
-def group():
-    return render_template("group.html")
 
 @app.route("/contact")
 def contact():
     return render_template("contact.html")
 
-@app.route("/solo")
-def solo():
-    return render_template("solo.html")
 
 
 # -------------------------------
