@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <title>예약 취소</title>
+  <style>
+    body {
+      font-family: 'Noto Sans KR', sans-serif;
+      background:#f7f9fc;
+      display:flex;
+      justify-content:center;
+      align-items:center;
+      height:100vh;
+      margin:0;
+    }
+    .box {
+      background:white;
+      padding:40px 50px;
+      border-radius:16px;
+      box-shadow:0 4px 12px rgba(0,0,0,0.1);
+      text-align:center;
+      width:420px;
+    }
+    h2 { color:#0d47a1; margin-bottom:20px; }
+    label { display:block; margin:10px 0 4px; font-weight:600; color:#333; text-align:left; }
+    input {
+      width:100%;
+      padding:10px;
+      border:1px solid #ccc;
+      border-radius:8px;
+      font-size:14px;
+    }
+    button {
+      margin-top:20px;
+      background:#1976d2;
+      color:white;
+      border:none;
+      border-radius:8px;
+      padding:10px 0;
+      width:100%;
+      font-weight:bold;
+      font-size:15px;
+      cursor:pointer;
+      transition:0.2s;
+    }
+    button:hover { background:#0d47a1; }
+    a { color:#1976d2; text-decoration:none; font-size:14px; display:block; margin-top:10px; }
+    a:hover { text-decoration:underline; }
+  </style>
+</head>
+<body>
+  <div class="box">
+    <h2>예약 취소</h2>
+
+    {% with messages = get_flashed_messages() %}
+      {% if messages %}
+        <ul style="list-style:none; padding:0;">
+          {% for msg in messages %}
+            <li style="color:#d32f2f; font-weight:600;">{{ msg|safe }}</li>
+          {% endfor %}
+        </ul>
+      {% endif %}
+    {% endwith %}
+
+    <form method="POST" action="/cancel_all">
+      <label>이름</label>
+      <input type="text" name="leader_name" placeholder="예: 홍길동" required>
+
+      <label>학번</label>
+      <input type="text" name="leader_id" placeholder="예: A123456" required>
+
+      <button type="submit">예약 조회</button>
+    </form>
+
+    <a href="{{ url_for('index') }}">← 메인으로</a>
+  </div>
+</body>
+</html>

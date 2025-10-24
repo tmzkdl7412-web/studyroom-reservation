@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <title>연장 확인</title>
+  <style>
+    body {
+      font-family: 'Noto Sans KR', sans-serif;
+      background: #f7f9fc;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      margin: 0;
+    }
+    .box {
+      background: white;
+      padding: 40px;
+      border-radius: 16px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+      text-align: center;
+      width: 420px;
+    }
+    h2 { color: #0d47a1; margin-bottom: 20px; }
+    p { font-size: 15px; margin: 8px 0; color: #333; }
+    button {
+      margin: 10px;
+      background: #1976d2;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      padding: 10px 20px;
+      cursor: pointer;
+      font-weight: bold;
+      transition: 0.2s;
+    }
+    button:hover { background: #0d47a1; }
+  </style>
+</head>
+<body>
+  <div class="box">
+    <h2>현재 사용 중인 좌석</h2>
+
+    {% if res.room %}
+      <p>단체실 번호: <strong>{{ res.room }}</strong></p>
+      <input type="hidden" name="type" value="group">
+    {% else %}
+      <p>개인석 번호: <strong>{{ res.seat }}</strong></p>
+      <input type="hidden" name="type" value="personal">
+    {% endif %}
+
+    <p>날짜: {{ res.date }}</p>
+    <p>시작 시간: {{ res.hour }}시</p>
+    <p>현재 이용 시간: {{ elapsed }}</p>
+
+    <form method="POST" action="/extend_confirm">
+      <input type="hidden" name="leader_id" value="{{ res.leader_id }}">
+      <input type="hidden" name="type" value="{% if res.room %}group{% else %}personal{% endif %}">
+      <p style="margin-top:20px;"><strong>연장할 시간 선택</strong></p>
+      <button type="submit" name="extend_hours" value="1">+1시간</button>
+      <button type="submit" name="extend_hours" value="2">+2시간</button>
+    </form>
+
+    <a href="{{ url_for('extend_page') }}" style="display:block;margin-top:20px;color:#1976d2;">← 돌아가기</a>
+  </div>
+</body>
+</html>
