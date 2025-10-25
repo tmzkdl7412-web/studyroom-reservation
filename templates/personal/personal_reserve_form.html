@@ -11,7 +11,8 @@
       height: 100vh;
       display: flex;
       justify-content: center;
-      align-items: center; /* ✅ 중앙정렬 */
+      align-items: center;
+      position: relative;
     }
 
     .container {
@@ -73,6 +74,7 @@
 
     button:hover {
       background-color: #0d47a1;
+      transform: translateY(-2px);
     }
 
     .back {
@@ -86,6 +88,33 @@
 
     .back:hover {
       text-decoration: underline;
+    }
+
+    /* ✅ 상하단 네이비 라인 (index.html 동일) */
+    body::before,
+    body::after {
+      content: "";
+      height: 30px;
+      width: 100%;
+      background: linear-gradient(to right, #001B4E, #003C9E, #001B4E);
+      position: fixed;
+      left: 0;
+      z-index: 9999;
+    }
+    body::before { top: 0; }
+    body::after { bottom: 0; }
+
+    /* ✅ 학과명 푸터 (index.html 동일) */
+    .eng-footer {
+      position: fixed;
+      bottom: 2px;
+      left: 0;
+      width: 100%;
+      text-align: center;
+      font-size: 20px;
+      color: white;
+      z-index: 10000;
+      pointer-events: none;
     }
   </style>
 </head>
@@ -126,6 +155,10 @@
     </form>
 
     <a href="{{ url_for('personal_detail', seat=seat) }}" class="back">← 예약 현황으로</a>
+  </div>
+
+  <div class="eng-footer">
+    Industrial &amp; Data Engineering, Hongik University
   </div>
 </body>
 </html>
