@@ -14,7 +14,7 @@
   button{margin-top:16px;padding:10px 18px;border-radius:8px;border:none;background:#1a73e8;color:#fff;font-weight:700}
   .hint{font-size:13px;color:#666;margin-top:6px}
 
-  /* ✅ 상하단 남색 라인 추가 */
+  /* ✅ 상하단 남색 라인 */
   body::before,
   body::after {
     content: "";
@@ -74,18 +74,17 @@
   <p class="hint">변경 가능 날짜는 오늘 포함 3일치만 가능합니다.</p>
 </div>
 
-<!-- ✅ 하단 학과명 표시 -->
+<!-- ✅ 하단 학과명 글씨 -->
 <footer style="
-  position: fixed;
-  bottom: 0;
-  left: 0;
-  width: 100%;
-  background: linear-gradient(to right, #001B4E, #1557c0);
+  background: linear-gradient(to right,#001B4E,#1557c0);
   color: white;
   text-align: center;
   padding: 10px 0;
   font-size: 13px;
-  z-index: 10000;
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  width: 100%;
 ">
   Industrial &amp; Data Engineering, Hongik University
 </footer>
