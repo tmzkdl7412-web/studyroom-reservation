@@ -398,11 +398,12 @@ def extend_select():
 
 @app.route("/extend_confirm", methods=["POST"])
 def extend_confirm():
-    leader_name = request.form.get("leader_name").strip()
-    leader_id = request.form.get("leader_id").strip().upper()
+    """개인석 연장 확인 및 처리"""
+    leader_name = request.form.get("leader_name", "").strip()
+    leader_id = request.form.get("leader_id", "").strip().upper()
     extend_hours = int(request.form.get("extend_hours", 0))
 
-    # ✅ DB에서 예약 조회
+    # ✅ 예약 조회
     reservation = PersonalReservation.query.filter_by(
         leader_name=leader_name, leader_id=leader_id
     ).first()
@@ -411,18 +412,22 @@ def extend_confirm():
         safe_flash("⚠️ 예약을 찾을 수 없습니다.")
         return redirect(url_for("extend"))
 
+    # ✅ 현재 시각과 예약 종료 시각 비교
     now = datetime.now(KST)
-    end_time = datetime.combine(reservation.date, datetime.min.time()) + timedelta(hours=reservation.hour + reservation.duration)
-    remaining = (end_time - now).total_seconds() / 60
+    end_time = datetime.combine(reservation.date, datetime.min.time()) + timedelta(
+        hours=reservation.hour + reservation.duration
+    )
+    remaining = (end_time - now).total_seconds() / 60  # 남은 시간(분)
 
-    # ✅ 20분 전에만 연장 가능
+    # ✅ 아직 20분 전이 아닐 경우: 연장 불가 페이지로
     if remaining > 20:
         return render_template("extend_blocked.html", remaining=int(remaining))
 
-    # ✅ 실제 연장 처리
+    # ✅ 연장 처리
     reservation.duration += extend_hours
     db.session.commit()
 
+    # ✅ 성공 페이지 렌더링
     return render_template("extend_success.html", extend_hours=extend_hours)
 
 # -------------------------------
