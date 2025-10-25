@@ -4,10 +4,73 @@
   <meta charset="UTF-8">
   <title>예약 취소 완료</title>
   <style>
-    body{font-family:"Noto Sans KR",sans-serif;background:#f6fff8;text-align:center;padding:80px}
-    .card{background:#fff;border:1px solid #e6f3ea;padding:30px;border-radius:14px;box-shadow:0 6px 18px rgba(0,0,0,.05);display:inline-block}
-    h2{color:#136f3a}
-    a{color:#1a73e8;text-decoration:none;font-weight:700}
+    body {
+      font-family: "Noto Sans KR", sans-serif;
+      background: #f6fff8;
+      text-align: center;
+      padding: 80px;
+      margin: 0;
+      position: relative;
+      min-height: 100vh;
+    }
+
+    .card {
+      background: #fff;
+      border: 1px solid #e6f3ea;
+      padding: 30px 50px;
+      border-radius: 14px;
+      box-shadow: 0 6px 18px rgba(0,0,0,.05);
+      display: inline-block;
+    }
+
+    h2 {
+      color: #136f3a;
+      margin-bottom: 10px;
+    }
+
+    p {
+      color: #333;
+      margin-bottom: 25px;
+    }
+
+    a {
+      color: #1557c0;
+      text-decoration: none;
+      font-weight: 700;
+      font-size: 15px;
+    }
+
+    a:hover {
+      text-decoration: underline;
+    }
+
+    /* ✅ 상단/하단 네이비 라인 */
+    body::before,
+    body::after {
+      content: "";
+      height: 6px;
+      width: 100%;
+      background: linear-gradient(to right, #001B4E, #1557c0);
+      position: fixed;
+      left: 0;
+      z-index: 9999;
+    }
+    body::before { top: 0; }
+    body::after { bottom: 0; }
+
+    /* ✅ 하단 학과명 텍스트 */
+    footer {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      background: linear-gradient(to right,#001B4E,#1557c0);
+      color: white;
+      text-align: center;
+      padding: 10px 0;
+      font-size: 13px;
+      letter-spacing: 0.2px;
+    }
   </style>
 </head>
 <body>
@@ -16,5 +79,9 @@
     <p>정상적으로 예약 취소가 완료되었습니다.</p>
     <a href="/">메인으로</a>
   </div>
+
+  <footer>
+    Industrial &amp; Data Engineering, Hongik University
+  </footer>
 </body>
 </html>
