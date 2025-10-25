@@ -333,6 +333,7 @@ def extend_page():
         name = request.form.get("leader_name", "").strip()
         sid = request.form.get("leader_id", "").strip().upper()
 
+        # 현재 시간대에 진행 중인 예약만 탐색
         group = Reservation.query.filter(
             Reservation.leader_name == name, Reservation.leader_id == sid,
             Reservation.date == today,
@@ -352,99 +353,139 @@ def extend_page():
 
         res = group or personal
         if not res:
-            safe_flash("금일 연장 가능한 예약이 없습니다.<br> 예약 종료 20분 전부터 연장이 가능합니다.")
+            safe_flash("금일 연장 가능한 예약이 없습니다.<br>예약 종료 20분 전부터만 연장이 가능합니다.")
             return redirect(url_for("extend_page"))
 
+        # 경과 시간 표시
         start_hour = int(res.hour)
-        end_time = datetime.strptime(f"{res.date} {start_hour}:00", "%Y-%m-%d %H:%M")
-        end_time = end_time.replace(tzinfo=KST) + timedelta(hours=int(res.duration))  # ✅ 타임존 적용
-
-        if not (end_time - timedelta(minutes=50) <= now <= end_time):
-            safe_flash("⚠️ 예약 종료 20분 전부터만 연장할 수 있습니다.")
-            return redirect(url_for("extend_page"))
-
-        elapsed = now - datetime.strptime(f"{res.date} {start_hour}:00", "%Y-%m-%d %H:%M").replace(tzinfo=KST)
+        start_dt = datetime.strptime(f"{res.date} {start_hour}:00", "%Y-%m-%d %H:%M").replace(tzinfo=KST)
+        elapsed = now - start_dt
         elapsed_str = f"{elapsed.seconds // 3600}시간 {(elapsed.seconds % 3600) // 60}분"
 
-        return render_template("extend_confirm.html", res=res, elapsed=elapsed_str)
+        # ✅ 연장 확인 페이지로: 타입/아이디를 명시적으로 전달
+        res_type = "group" if isinstance(res, Reservation) else "personal"
+        return render_template("extend_confirm.html", res=res, res_type=res_type, elapsed=elapsed_str)
 
     return render_template("extend_page.html")
+    
 @app.route("/extend_select", methods=["POST"])
 def extend_select():
-    type_ = request.form.get("type")
-    leader_id = request.form.get("leader_id")
+    type_ = request.form.get("type")  # "group" or "personal"
+    leader_id = request.form.get("leader_id", "").strip().upper()
 
     now = datetime.now(KST)
     today = now.strftime("%Y-%m-%d")
 
     if type_ == "group":
-        res = Reservation.query.filter_by(leader_id=leader_id, date=today).first()
+        res = Reservation.query.filter(
+            Reservation.leader_id == leader_id, Reservation.date == today,
+            cast(Reservation.hour, Integer) <= now.hour,
+            (cast(Reservation.hour, Integer) + cast(Reservation.duration, Integer)) > now.hour
+        ).first()
+        res_type = "group"
     else:
-        res = PersonalReservation.query.filter_by(leader_id=leader_id, date=today).first()
+        res = PersonalReservation.query.filter(
+            PersonalReservation.leader_id == leader_id, PersonalReservation.date == today,
+            cast(PersonalReservation.hour, Integer) <= now.hour,
+            (cast(PersonalReservation.hour, Integer) + cast(PersonalReservation.duration, Integer)) > now.hour
+        ).first()
+        res_type = "personal"
+
+    if not res:
+        safe_flash("연장 가능한 예약을 찾을 수 없습니다.")
+        return redirect(url_for("extend_page"))
 
     start_hour = int(res.hour)
-    start_time = datetime.strptime(f"{res.date} {start_hour}:00", "%Y-%m-%d %H:%M")
-    elapsed = now - start_time
-    hours = elapsed.seconds // 3600
-    minutes = (elapsed.seconds % 3600) // 60
-    elapsed_str = f"{hours}시간 {minutes}분"
+    start_dt = datetime.strptime(f"{res.date} {start_hour}:00", "%Y-%m-%d %H:%M").replace(tzinfo=KST)
+    elapsed = now - start_dt
+    elapsed_str = f"{elapsed.seconds // 3600}시간 {(elapsed.seconds % 3600) // 60}분"
 
-    return render_template("extend_confirm.html", res=res, elapsed=elapsed_str)
+    return render_template("extend_confirm.html", res=res, res_type=res_type, elapsed=elapsed_str)
+
 
 
 @app.route("/extend_confirm", methods=["POST"])
 def extend_confirm():
-    """단체/개인 공통 연장 처리 — 날짜 넘어감, 중복예약, 결과 페이지 표시"""
-    leader_name = request.form.get("leader_name", "").strip()
-    leader_id = request.form.get("leader_id", "").strip().upper()
+    """
+    단체/개인 공통 연장 처리:
+    - 요청으로 받은 type+id로 정확히 1건 조회
+    - 23→00 자정 넘김 처리
+    - 뒤 시간대 겹침 검증 (1시간/2시간 각각)
+    - 성공 시 extend_success.html / 실패 시 extend_blocked.html
+    """
+    res_type = request.form.get("res_type")          # "group" or "personal"
+    res_id = request.form.get("res_id", type=int)    # 예약 PK
     extend_hours = int(request.form.get("extend_hours", 0))
 
-    # ✅ 현재 예약이 단체인지 개인인지 판별
-    reservation = Reservation.query.filter_by(
-        leader_name=leader_name, leader_id=leader_id
-    ).first()
-    is_group = True
+    # ✅ 정확한 모델/레코드 선택
+    if res_type == "group":
+        Model = Reservation
+    else:
+        Model = PersonalReservation
 
-    if not reservation:
-        reservation = PersonalReservation.query.filter_by(
-            leader_name=leader_name, leader_id=leader_id
-        ).first()
-        is_group = False
-
+    reservation = Model.query.filter_by(id=res_id).first()
     if not reservation:
         safe_flash("⚠️ 예약을 찾을 수 없습니다.")
         return redirect(url_for("extend_page"))
 
-    now = datetime.now(KST)
-
+    # 기본 정보
     start_hour = int(reservation.hour)
     duration = int(reservation.duration)
     start_dt = datetime.strptime(f"{reservation.date} {start_hour}:00", "%Y-%m-%d %H:%M").replace(tzinfo=KST)
-    end_dt = start_dt + timedelta(hours=duration)
+    end_dt = start_dt + timedelta(hours=duration)  # 현재 종료 시각
 
-    # ✅ 날짜 넘어가는 연장 계산
+    # 연장 구간 (end_dt ~ end_dt + extend_hours)
+    new_start_hour = end_dt.hour
     new_end_dt = end_dt + timedelta(hours=extend_hours)
     new_date = new_end_dt.strftime("%Y-%m-%d")
-    new_start_hour = end_dt.hour
+    old_date = reservation.date
 
-    # ✅ 해당 테이블에 겹치는 예약이 있는지 확인
-    Model = Reservation if is_group else PersonalReservation
-    overlap = Model.query.filter(
-        (Model.date == reservation.date) | (Model.date == new_date),
-        cast(Model.hour, Integer) < new_start_hour + extend_hours,
-        (cast(Model.hour, Integer) + cast(Model.duration, Integer)) > new_start_hour,
-        Model.id != reservation.id
-    ).first()
+    # ✅ 겹침 검사 함수
+    def has_overlap(model, date_str, start_h, dur):
+        if model is Reservation:
+            # 단체실은 같은 room 끼리만 충돌
+            q = model.query.filter(
+                model.room == reservation.room,
+                model.date == date_str,
+                cast(model.hour, Integer) < start_h + dur,
+                (cast(model.hour, Integer) + cast(model.duration, Integer)) > start_h,
+                model.id != reservation.id
+            )
+        else:
+            # 개인석은 같은 seat 끼리만 충돌
+            q = model.query.filter(
+                model.seat == reservation.seat,
+                model.date == date_str,
+                cast(model.hour, Integer) < start_h + dur,
+                (cast(model.hour, Integer) + cast(model.duration, Integer)) > start_h,
+                model.id != reservation.id
+            )
+        return q.first() is not None
 
-    if overlap:
-        # ❌ 뒤 시간대 예약 충돌
+    # ✅ 1시간/2시간 각각 케이스를 정확히 반영
+    # 사용자가 +1 / +2 중 무엇을 눌렀는지 그대로 판단해서 block/success 분기
+    if extend_hours <= 0:
+        safe_flash("연장 시간이 올바르지 않습니다.")
+        return redirect(url_for("extend_page"))
+
+    # 자정 넘김 여부
+    crosses_midnight = (new_date != old_date) and (new_start_hour < start_hour)
+
+    # 겹침 검사 대상 날짜/시작시각
+    check_date = old_date if not crosses_midnight else new_date
+    check_start_hour = new_start_hour
+    check_duration = extend_hours
+
+    if has_overlap(Model, check_date, check_start_hour, check_duration):
+        # ❌ 뒤 시간에 예약 존재 → 차단 페이지
         return render_template(
             "extend_blocked.html",
-            message=f"⚠️ 연장 불가: {overlap.hour}시~{int(overlap.hour)+int(overlap.duration)}시 예약이 이미 있습니다."
+            message="⚠️ 연장 불가: 뒤 시간대에 이미 예약이 있습니다."
         )
 
-    # ✅ 날짜가 바뀌면 다음날로 업데이트
-    if new_date != reservation.date and new_start_hour < start_hour:
+    # ✅ DB 업데이트
+    if crosses_midnight:
+        # 23~24 사용 후 +1h → 다음날 00~01로 갱신
         reservation.date = new_date
         reservation.hour = str(new_start_hour)
         reservation.duration = extend_hours
@@ -453,10 +494,8 @@ def extend_confirm():
 
     db.session.commit()
 
-    # ✅ 성공 페이지 렌더링
+    # ✅ 성공 페이지
     return render_template("extend_success.html", extend_hours=extend_hours)
-
-
 
 # -------------------------------
 # 🔸 예약 취소
