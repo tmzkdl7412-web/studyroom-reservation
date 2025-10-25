@@ -10,7 +10,7 @@
       display: flex;
       justify-content: center;
       align-items: center;
-      height: 100vh; /* ✅ 수직 중앙 정렬 */
+      height: 100vh;
       margin: 0;
     }
 
@@ -88,6 +88,20 @@
       margin-top: 10px;
       font-weight: 500;
     }
+
+    /* ✅ 상하단 네이비 라인 */
+    body::before,
+    body::after {
+      content: "";
+      height: 6px;
+      width: 100%;
+      background: linear-gradient(to right, #001B4E, #1557c0);
+      position: fixed;
+      left: 0;
+      z-index: 9999;
+    }
+    body::before { top: 0; }
+    body::after { bottom: 0; }
   </style>
 </head>
 <body>
@@ -128,6 +142,21 @@
     <a href="/room_detail?room={{ room }}" class="back">← 예약 현황으로</a>
   </div>
 
+  <!-- ✅ 하단 학과명 텍스트 -->
+  <footer style="
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    background: linear-gradient(to right,#001B4E,#1557c0);
+    color: white;
+    text-align: center;
+    padding: 10px 0;
+    font-size: 13px;
+  ">
+    Industrial &amp; Data Engineering, Hongik University
+  </footer>
+
   <script>
     const memberCountSelect = document.getElementById('memberCount');
     const memberFieldsDiv = document.getElementById('memberFields');
@@ -164,7 +193,7 @@
         e.preventDefault();
         return;
       }
-      const memberIds = document.querySelectorAll('[name^="member_"][name$="_id"]');
+      const memberIds = document.querySelectorAll('[name^=\"member_\"][name$=\"_id\"]');
       for (const input of memberIds) {
         if (input.value.trim() && !idPattern.test(input.value.trim())) {
           alert("팀원 학번 형식이 잘못되었습니다. 예: A123456");
