@@ -394,55 +394,56 @@ def extend_select():
 
 @app.route("/extend_confirm", methods=["POST"])
 def extend_confirm():
-    """개인석 연장 확인 및 처리 — 날짜 넘어감, 겹침검사, 결과 페이지 포함"""
+    """단체/개인 공통 연장 처리 — 날짜 넘어감, 중복예약, 결과 페이지 표시"""
     leader_name = request.form.get("leader_name", "").strip()
     leader_id = request.form.get("leader_id", "").strip().upper()
     extend_hours = int(request.form.get("extend_hours", 0))
 
-    # ✅ 예약 조회
-    reservation = PersonalReservation.query.filter_by(
+    # ✅ 현재 예약이 단체인지 개인인지 판별
+    reservation = Reservation.query.filter_by(
         leader_name=leader_name, leader_id=leader_id
     ).first()
+    is_group = True
+
+    if not reservation:
+        reservation = PersonalReservation.query.filter_by(
+            leader_name=leader_name, leader_id=leader_id
+        ).first()
+        is_group = False
 
     if not reservation:
         safe_flash("⚠️ 예약을 찾을 수 없습니다.")
         return redirect(url_for("extend_page"))
 
-    # ✅ 현재 시각 계산
     now = datetime.now(KST)
+
     start_hour = int(reservation.hour)
     duration = int(reservation.duration)
     start_dt = datetime.strptime(f"{reservation.date} {start_hour}:00", "%Y-%m-%d %H:%M").replace(tzinfo=KST)
     end_dt = start_dt + timedelta(hours=duration)
 
-    # ✅ 날짜 넘어감 계산 (23→00시)
+    # ✅ 날짜 넘어가는 연장 계산
     new_end_dt = end_dt + timedelta(hours=extend_hours)
     new_date = new_end_dt.strftime("%Y-%m-%d")
     new_start_hour = end_dt.hour
 
-    # ✅ 전체 연장 구간에 겹치는 예약 있는지 확인
-    overlap = PersonalReservation.query.filter(
-        PersonalReservation.seat == reservation.seat,
-        (
-            # 같은 날짜 또는 다음날
-            (PersonalReservation.date == reservation.date) |
-            (PersonalReservation.date == new_date)
-        ),
-        cast(PersonalReservation.hour, Integer) < new_start_hour + extend_hours,
-        (cast(PersonalReservation.hour, Integer) + cast(PersonalReservation.duration, Integer)) > new_start_hour,
-        PersonalReservation.id != reservation.id
+    # ✅ 해당 테이블에 겹치는 예약이 있는지 확인
+    Model = Reservation if is_group else PersonalReservation
+    overlap = Model.query.filter(
+        (Model.date == reservation.date) | (Model.date == new_date),
+        cast(Model.hour, Integer) < new_start_hour + extend_hours,
+        (cast(Model.hour, Integer) + cast(Model.duration, Integer)) > new_start_hour,
+        Model.id != reservation.id
     ).first()
 
     if overlap:
-        # ❌ 겹침 발생 시 — extend_blocked.html 렌더링
+        # ❌ 뒤 시간대 예약 충돌
         return render_template(
             "extend_blocked.html",
-            remaining=0,
-            message=f"⚠️ 연장 불가: 뒤 시간({overlap.hour}시~{int(overlap.hour)+int(overlap.duration)}시)에 이미 예약이 있습니다."
+            message=f"⚠️ 연장 불가: {overlap.hour}시~{int(overlap.hour)+int(overlap.duration)}시 예약이 이미 있습니다."
         )
 
-    # ✅ 연장 가능한 경우 → DB 업데이트
-    # 날짜 넘어가면 다음날로 표시 (23:00~24:00 → 24일 00시 시작)
+    # ✅ 날짜가 바뀌면 다음날로 업데이트
     if new_date != reservation.date and new_start_hour < start_hour:
         reservation.date = new_date
         reservation.hour = str(new_start_hour)
@@ -452,8 +453,9 @@ def extend_confirm():
 
     db.session.commit()
 
-    # ✅ 연장 성공 페이지
+    # ✅ 성공 페이지 렌더링
     return render_template("extend_success.html", extend_hours=extend_hours)
+
 
 
 # -------------------------------
