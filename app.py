@@ -8,8 +8,8 @@ app = create_app()
 KST = timezone(timedelta(hours=9))
 # ---------------- 유틸 ----------------
 def make_days(n=7):
-    """✅ 오늘부터 n일치 날짜 리스트 생성 (예: 오늘이 25일이면 25,26,27...)"""
-    base = datetime.now().replace(hour=0, minute=0, second=0, microsecond=0)
+    """✅ 오늘부터 n일치 날짜 리스트 생성 (한국 시간 기준)"""
+    base = datetime.now(KST).replace(hour=0, minute=0, second=0, microsecond=0)
     return [(base + timedelta(days=i)).strftime("%Y-%m-%d") for i in range(n)]
 
 def hours_24():
