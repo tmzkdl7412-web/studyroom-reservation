@@ -420,8 +420,8 @@ def extend_confirm():
     remaining = (end_time - now).total_seconds() / 60  # 남은 시간(분)
 
     # ⚠️ 테스트 중에는 20분 제한 조건 비활성화
-    # if remaining > 20:
-    #     return render_template("extend_blocked.html", remaining=int(remaining))
+    if remaining > 50:
+         return render_template("extend_blocked.html", remaining=int(remaining))
 
     # ✅ 연장 처리
     reservation.duration += extend_hours
