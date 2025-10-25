@@ -410,21 +410,23 @@ def extend_confirm():
 
     if not reservation:
         safe_flash("⚠️ 예약을 찾을 수 없습니다.")
-        return redirect(url_for("extend"))
+        return redirect(url_for("extend_page"))
 
-    # ✅ 현재 시각과 예약 종료 시각 계산
+    # ✅ 현재 시각과 예약 종료 시각 계산 (정확한 int 변환 추가)
     now = datetime.now(KST)
-    end_time = datetime.combine(reservation.date, datetime.min.time()) + timedelta(
-        hours=reservation.hour + reservation.duration
-    )
-    remaining = (end_time - now).total_seconds() / 60  # 남은 시간(분)
+    start_hour = int(reservation.hour)
+    duration = int(reservation.duration)
+    end_time = datetime.strptime(f"{reservation.date} {start_hour}:00", "%Y-%m-%d %H:%M").replace(tzinfo=KST) + timedelta(hours=duration)
 
-    # ⚠️ 테스트 중에는 20분 제한 조건 비활성화
+    remaining = (end_time - now).total_seconds() / 60  # 남은 시간(분)
+    print(f"🕒 현재시간: {now.strftime('%Y-%m-%d %H:%M:%S')}, 종료시각: {end_time}, 남은분: {remaining:.1f}")
+
+    # ⚠️ 테스트 중에는 20분 제한 조건 비활성화 (50분 초과시 차단)
     if remaining > 50:
-         return render_template("extend_blocked.html", remaining=int(remaining))
+        return render_template("extend_blocked.html", remaining=int(remaining))
 
     # ✅ 연장 처리
-    reservation.duration += extend_hours
+    reservation.duration = duration + extend_hours
     db.session.commit()
 
     # ✅ 성공 페이지 렌더링
