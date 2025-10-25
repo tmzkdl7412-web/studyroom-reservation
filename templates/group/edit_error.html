@@ -7,23 +7,24 @@
     <style>
       body {
         font-family: "Noto Sans KR", sans-serif;
-        background: linear-gradient(135deg, #f9fafc 0%, #e8f0ff 100%);
+        background: #f9fafc;
         height: 100vh;
         display: flex;
-        flex-direction: column;
-        align-items: center;
         justify-content: center;
+        align-items: center;
         margin: 0;
         position: relative;
       }
 
+      /* ✅ 오류 박스 */
       .error-box {
         background-color: #ffffff;
         border-radius: 20px;
-        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.08);
+        box-shadow: 0 6px 20px rgba(0, 0, 0, 0.08);
         padding: 50px 70px;
         text-align: center;
         max-width: 600px;
+        z-index: 10;
       }
 
       .error-icon {
@@ -33,15 +34,14 @@
 
       h1 {
         color: #d32f2f;
-        font-size: 28px;
+        font-size: 26px;
         font-weight: 800;
-        margin-top: 10px;
-        margin-bottom: 25px;
+        margin: 10px 0 25px;
       }
 
       p {
         color: #333;
-        font-size: 18px;
+        font-size: 17px;
         line-height: 1.6;
       }
 
@@ -50,7 +50,7 @@
         margin-top: 30px;
         text-decoration: none;
         color: white;
-        background-color: #1a73e8;
+        background-color: #1557c0;
         padding: 12px 28px;
         border-radius: 8px;
         font-weight: 600;
@@ -58,29 +58,25 @@
       }
 
       a:hover {
-        background-color: #155cc0;
+        background-color: #0d47a1;
         transform: translateY(-2px);
       }
 
-      /* ✅ index.html과 동일한 상·하단 라인 */
+      /* ✅ 상하단 네이비 라인 (index.html 동일) */
       body::before,
       body::after {
         content: "";
         height: 30px;
         width: 100%;
-        background: linear-gradient(to right, #001b4e, #003c9e, #001b4e);
+        background: linear-gradient(to right, #001B4E, #003C9E, #001B4E);
         position: fixed;
         left: 0;
         z-index: 9999;
       }
-      body::before {
-        top: 0;
-      }
-      body::after {
-        bottom: 0;
-      }
+      body::before { top: 0; }
+      body::after { bottom: 0; }
 
-      /* ✅ 하단 학과명 푸터 */
+      /* ✅ 학과명 푸터 (index.html 동일) */
       .eng-footer {
         position: fixed;
         bottom: 2px;
