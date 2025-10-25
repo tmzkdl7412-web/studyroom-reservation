@@ -1,12 +1,90 @@
-<div class="card">
-  <h2 style="color:#d93025;">⚠️ 예약이 있어 자리를 연장할 수 없습니다</h2>
-  <p>
-    {% if message %}
-      {{ message }}
-    {% else %}
-      예약 종료 {{ remaining|int }}분 전이 아닙니다.<br>
-      연장은 예약 종료 20분 전부터만 가능합니다.
-    {% endif %}
-  </p>
-  <a href="{{ url_for('index') }}" class="btn btn-primary">← 홈으로 가기</a>
-</div>
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <title>연장 불가</title>
+  <style>
+    body {
+      font-family: 'Noto Sans KR', sans-serif;
+      background: #f7f9fc;
+      margin: 0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+    }
+
+    .card {
+      background: #fff;
+      border-radius: 16px;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+      padding: 50px 60px;
+      text-align: center;
+      width: 460px;
+      animation: fadeIn 0.5s ease-in-out;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .icon {
+      font-size: 42px;
+      color: #f39c12;
+    }
+
+    h2 {
+      color: #c0392b;
+      font-size: 24px;
+      font-weight: 800;
+      margin-top: 12px;
+      margin-bottom: 16px;
+    }
+
+    p {
+      color: #333;
+      font-size: 16px;
+      line-height: 1.6;
+      margin-bottom: 28px;
+    }
+
+    .btn {
+      display: inline-block;
+      text-decoration: none;
+      background: #1557c0;
+      color: #fff;
+      font-weight: 600;
+      padding: 12px 28px;
+      border-radius: 8px;
+      transition: background 0.2s;
+    }
+
+    .btn:hover {
+      background: #003c99;
+    }
+
+    .back-link {
+      display: block;
+      margin-top: 20px;
+      color: #1557c0;
+      text-decoration: none;
+      font-weight: 500;
+    }
+
+    .back-link:hover {
+      text-decoration: underline;
+    }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <div class="icon">⚠️</div>
+    <h2>예약이 있어 자리를 연장할 수 없습니다</h2>
+    <p>{{ message or "연장 불가: 뒤 시간대에 이미 예약이 있습니다." }}</p>
+
+    <a href="{{ url_for('index') }}" class="btn">홈으로 가기</a>
+    <a href="{{ url_for('extend_page') }}" class="back-link">← 연장 페이지로 돌아가기</a>
+  </div>
+</body>
+</html>
