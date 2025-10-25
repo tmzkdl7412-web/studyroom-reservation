@@ -12,6 +12,7 @@
       align-items: center;
       height: 100vh;
       margin: 0;
+      position: relative;
     }
 
     .card {
@@ -30,9 +31,10 @@
     }
 
     h2 {
-      color: #00205B;
+      color: #001B4E;
       font-size: 26px;
       margin-bottom: 10px;
+      font-weight: 700;
     }
 
     .check {
@@ -48,7 +50,7 @@
     }
 
     button {
-      background: #1976d2;
+      background: #1557c0;
       color: white;
       border: none;
       border-radius: 8px;
@@ -56,10 +58,12 @@
       font-size: 16px;
       cursor: pointer;
       font-weight: 600;
+      transition: 0.2s;
     }
 
     button:hover {
-      background: #1258a8;
+      background: #0d47a1;
+      transform: translateY(-2px);
     }
 
     ul.notice {
@@ -80,11 +84,37 @@
       margin-bottom: 6px;
     }
 
+    /* ✅ 상하단 네이비 라인 (index.html 동일) */
+    body::before,
+    body::after {
+      content: "";
+      height: 30px;
+      width: 100%;
+      background: linear-gradient(to right, #001B4E, #003C9E, #001B4E);
+      position: fixed;
+      left: 0;
+      z-index: 9999;
+    }
+    body::before { top: 0; }
+    body::after { bottom: 0; }
+
+    /* ✅ 학과명 푸터 (index.html 동일) */
+    .eng-footer {
+      position: fixed;
+      bottom: 2px;
+      left: 0;
+      width: 100%;
+      text-align: center;
+      font-size: 20px;
+      color: white;
+      z-index: 10000;
+      pointer-events: none;
+    }
   </style>
 </head>
 <body>
   <div class="card">
-    <div class="check"></div>
+    <div class="check">✅</div>
     <h2>{{ title }}</h2>
     <p>{{ message }}</p>
 
@@ -98,6 +128,10 @@
     <form action="{{ back_url }}">
       <button type="submit">돌아가기</button>
     </form>
+  </div>
+
+  <div class="eng-footer">
+    Industrial &amp; Data Engineering, Hongik University
   </div>
 </body>
 </html>
