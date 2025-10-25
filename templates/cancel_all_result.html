@@ -5,40 +5,95 @@
   <title>예약 취소 결과</title>
   <style>
     body {
-      font-family:'Noto Sans KR', sans-serif;
-      background:#f7f9fc;
-      margin:0;
-      padding:30px;
+      font-family: 'Noto Sans KR', sans-serif;
+      background: #f7f9fc;
+      margin: 0;
+      padding: 30px;
     }
-    h2 { color:#0d47a1; text-align:center; }
+
+    h2 {
+      color: #0d47a1;
+      text-align: center;
+      margin-bottom: 10px;
+    }
+
     table {
-      width:90%;
-      margin:20px auto;
-      border-collapse:collapse;
-      background:white;
-      border-radius:12px;
-      overflow:hidden;
-      box-shadow:0 4px 12px rgba(0,0,0,0.1);
+      width: 90%;
+      margin: 20px auto;
+      border-collapse: collapse;
+      background: white;
+      border-radius: 12px;
+      overflow: hidden;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
     }
+
     th, td {
-      border:1px solid #eee;
-      padding:10px;
-      text-align:center;
-      font-size:14px;
+      border: 1px solid #eee;
+      padding: 10px;
+      text-align: center;
+      font-size: 14px;
     }
-    th { background:#f1f6ff; color:#0d47a1; }
+
+    th {
+      background: #f1f6ff;
+      color: #0d47a1;
+    }
+
     button {
-      background:#1976d2;
-      color:white;
-      border:none;
-      border-radius:8px;
-      padding:10px 20px;
-      cursor:pointer;
-      font-weight:bold;
-      margin-top:10px;
+      background: #1976d2;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      padding: 10px 20px;
+      cursor: pointer;
+      font-weight: bold;
+      margin-top: 10px;
     }
-    button:hover { background:#0d47a1; }
-    .msg { text-align:center; color:#555; font-size:15px; margin-top:20px; }
+
+    button:hover {
+      background: #0d47a1;
+    }
+
+    .msg {
+      text-align: center;
+      color: #555;
+      font-size: 15px;
+      margin-top: 20px;
+    }
+
+    ul {
+      list-style: none;
+      padding: 0;
+      text-align: center;
+      margin-top: 10px;
+    }
+
+    ul li {
+      color: #2e7d32;
+      font-weight: 600;
+    }
+
+    h3 {
+      text-align: center;
+      color: #0d47a1;
+      margin-top: 30px;
+    }
+
+    .home-link {
+      display: inline-block;
+      background: #0d47a1;
+      color: white;
+      text-decoration: none;
+      font-weight: bold;
+      padding: 10px 18px;
+      border-radius: 8px;
+      margin-top: 25px;
+      transition: background 0.2s;
+    }
+
+    .home-link:hover {
+      background: #1976d2;
+    }
   </style>
 </head>
 <body>
@@ -46,22 +101,28 @@
 
   {% with messages = get_flashed_messages() %}
     {% if messages %}
-      <ul style="list-style:none; padding:0; text-align:center;">
+      <ul>
         {% for msg in messages %}
-          <li style="color:#2e7d32; font-weight:600;">{{ msg|safe }}</li>
+          <li>{{ msg|safe }}</li>
         {% endfor %}
       </ul>
     {% endif %}
   {% endwith %}
 
   <form method="POST" action="/cancel_all_confirm">
+    <!-- 대표자 정보는 숨김 필드로 전달 -->
     <input type="hidden" name="leader_name" value="{{ leader_name }}">
     <input type="hidden" name="leader_id" value="{{ leader_id }}">
 
     {% if group_reservations %}
-      <h3 style="text-align:center; color:#0d47a1;">📘 단체실 예약</h3>
+      <h3>📘 단체실 예약</h3>
       <table>
-        <tr><th>선택</th><th>프로젝트실</th><th>날짜</th><th>시간</th></tr>
+        <tr>
+          <th>선택</th>
+          <th>프로젝트실</th>
+          <th>날짜</th>
+          <th>시간</th>
+        </tr>
         {% for r in group_reservations %}
           <tr>
             <td><input type="checkbox" name="selected" value="group_{{r.room}}_{{r.date}}_{{r.hour}}"></td>
@@ -74,9 +135,14 @@
     {% endif %}
 
     {% if personal_reservations %}
-      <h3 style="text-align:center; color:#0d47a1;">🪑 개인석 예약</h3>
+      <h3>🪑 개인석 예약</h3>
       <table>
-        <tr><th>선택</th><th>좌석</th><th>날짜</th><th>시간</th></tr>
+        <tr>
+          <th>선택</th>
+          <th>좌석</th>
+          <th>날짜</th>
+          <th>시간</th>
+        </tr>
         {% for r in personal_reservations %}
           <tr>
             <td><input type="checkbox" name="selected" value="personal_{{r.seat}}_{{r.date}}_{{r.hour}}"></td>
@@ -96,5 +162,10 @@
   {% if not group_reservations and not personal_reservations %}
     <p class="msg">예약 내역이 없습니다.</p>
   {% endif %}
+
+  <!-- ✅ 홈으로 돌아가기 버튼 -->
+  <div style="text-align:center;">
+    <a href="/" class="home-link">🏠 홈으로 돌아가기</a>
+  </div>
 </body>
 </html>
