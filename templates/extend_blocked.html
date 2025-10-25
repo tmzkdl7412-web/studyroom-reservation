@@ -1,1 +1,56 @@
-
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <title>연장 불가</title>
+  <style>
+    body {
+      font-family: 'Noto Sans KR', sans-serif;
+      background-color: #f6f9fc;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      margin: 0;
+    }
+    .card {
+      background: #fff;
+      padding: 50px 80px;
+      border-radius: 18px;
+      box-shadow: 0 4px 16px rgba(0,0,0,0.08);
+      text-align: center;
+    }
+    h2 {
+      color: #d93025;
+      margin-bottom: 20px;
+      font-size: 24px;
+    }
+    p {
+      font-size: 17px;
+      color: #333;
+      margin-bottom: 40px;
+      line-height: 1.6;
+    }
+    a.btn {
+      background-color: #1557c0;
+      color: #fff;
+      padding: 12px 36px;
+      border-radius: 8px;
+      text-decoration: none;
+      font-weight: 600;
+      transition: 0.2s;
+    }
+    a.btn:hover {
+      background-color: #003b95;
+    }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <h2>⚠️ 연장할 수 없습니다</h2>
+    <p>예약 종료 {{ remaining|int }}분 전이 아닙니다.<br>
+       연장은 예약 종료 20분 전부터만 가능합니다.</p>
+    <a href="{{ url_for('index') }}" class="btn">← 홈으로 가기</a>
+  </div>
+</body>
+</html>
