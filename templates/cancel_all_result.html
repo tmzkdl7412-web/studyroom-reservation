@@ -58,13 +58,6 @@
     <input type="hidden" name="leader_name" value="{{ leader_name }}">
     <input type="hidden" name="leader_id" value="{{ leader_id }}">
 
-    <!-- 전화번호 입력 추가 -->
-    <div style="text-align:center; margin-bottom:20px;">
-      <label style="font-weight:600; color:#0d47a1;">전화번호 입력 (본인 확인)</label><br>
-      <input type="text" name="leader_phone" placeholder="예: 010-1234-5678" required
-             style="padding:8px; border-radius:8px; border:1px solid #ccc; width:200px; font-size:14px;">
-    </div>
-
     {% if group_reservations %}
       <h3 style="text-align:center; color:#0d47a1;">📘 단체실 예약</h3>
       <table>
