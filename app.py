@@ -398,7 +398,7 @@ def extend_select():
 
 @app.route("/extend_confirm", methods=["POST"])
 def extend_confirm():
-    """개인석 연장 확인 및 처리"""
+    """개인석 연장 확인 및 처리 (테스트용: 20분 제한 해제)"""
     leader_name = request.form.get("leader_name", "").strip()
     leader_id = request.form.get("leader_id", "").strip().upper()
     extend_hours = int(request.form.get("extend_hours", 0))
@@ -412,16 +412,16 @@ def extend_confirm():
         safe_flash("⚠️ 예약을 찾을 수 없습니다.")
         return redirect(url_for("extend"))
 
-    # ✅ 현재 시각과 예약 종료 시각 비교
+    # ✅ 현재 시각과 예약 종료 시각 계산
     now = datetime.now(KST)
     end_time = datetime.combine(reservation.date, datetime.min.time()) + timedelta(
         hours=reservation.hour + reservation.duration
     )
     remaining = (end_time - now).total_seconds() / 60  # 남은 시간(분)
 
-    # ✅ 아직 20분 전이 아닐 경우: 연장 불가 페이지로
-    if remaining > 20:
-        return render_template("extend_blocked.html", remaining=int(remaining))
+    # ⚠️ 테스트 중에는 20분 제한 조건 비활성화
+    # if remaining > 20:
+    #     return render_template("extend_blocked.html", remaining=int(remaining))
 
     # ✅ 연장 처리
     reservation.duration += extend_hours
@@ -429,7 +429,6 @@ def extend_confirm():
 
     # ✅ 성공 페이지 렌더링
     return render_template("extend_success.html", extend_hours=extend_hours)
-
 # -------------------------------
 # 🔸 예약 취소
 # -------------------------------
