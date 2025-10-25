@@ -12,54 +12,118 @@
       align-items: center;
       height: 100vh;
       margin: 0;
+      position: relative;
     }
+
     .container {
       background: white;
       padding: 40px 50px;
       border-radius: 16px;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+      box-shadow: 0 6px 18px rgba(0,0,0,0.08);
       text-align: center;
       width: 420px;
+      transition: 0.25s ease;
     }
-    h2 { color: #0d47a1; margin-bottom: 20px; }
+
+    .container:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 10px 24px rgba(0,0,0,0.12);
+    }
+
+    h2 {
+      color: #001B4E;
+      margin-bottom: 22px;
+      font-size: 22px;
+    }
+
     label {
       display: block;
-      margin: 12px 0 6px;
+      margin: 14px 0 6px;
       text-align: left;
       font-weight: 600;
-      color: #333;
+      color: #001B4E;
+      font-size: 15px;
     }
+
     input {
       width: 100%;
       padding: 10px;
       border: 1px solid #ccc;
       border-radius: 8px;
-      font-size: 14px;
+      font-size: 15px;
+      box-sizing: border-box;
     }
+
     button {
-      margin-top: 20px;
-      background: #1976d2;
+      margin-top: 26px;
+      background: #1557c0;
       color: white;
       border: none;
-      border-radius: 8px;
-      padding: 10px 0;
+      border-radius: 10px;
+      padding: 12px 0;
       width: 100%;
       font-weight: bold;
-      font-size: 15px;
+      font-size: 16px;
       cursor: pointer;
       transition: 0.2s;
     }
-    button:hover { background: #0d47a1; }
+
+    button:hover {
+      background: #003c99;
+      transform: translateY(-2px);
+    }
+
     .back {
       display: block;
-      margin-top: 15px;
-      color: #1976d2;
+      margin-top: 18px;
+      color: #1557c0;
       text-decoration: none;
+      font-size: 15px;
+      font-weight: 500;
+    }
+
+    .back:hover {
+      text-decoration: underline;
+    }
+
+    ul {
+      list-style: none;
+      padding: 0;
+      margin: 0 0 10px 0;
+    }
+
+    ul li {
+      color: #d32f2f;
+      font-weight: 600;
       font-size: 14px;
     }
-    .back:hover { text-decoration: underline; }
-    .alert { color: #d32f2f; margin-bottom: 10px; font-weight: 600; }
-    .success { color: #2e7d32; margin-bottom: 10px; font-weight: 600; }
+
+    /* ✅ 상하단 네이비 라인 */
+    body::before,
+    body::after {
+      content: "";
+      height: 30px;
+      width: 100%;
+      background: linear-gradient(to right, #001B4E, #003C9E, #001B4E);
+      position: fixed;
+      left: 0;
+      z-index: 9999;
+    }
+    body::before { top: 0; }
+    body::after { bottom: 0; }
+
+    /* ✅ 학과명 푸터 */
+    .eng-footer {
+      position: fixed;
+      bottom: 2px;
+      left: 0;
+      width: 100%;
+      text-align: center;
+      font-size: 20px;
+      color: white;
+      z-index: 10000;
+      pointer-events: none;
+    }
   </style>
 </head>
 <body>
@@ -68,9 +132,9 @@
 
     {% with messages = get_flashed_messages() %}
       {% if messages %}
-        <ul style="list-style:none; padding:0;">
+        <ul>
           {% for msg in messages %}
-            <li style="color:red; font-weight:600;">{{ msg|safe }}</li>
+            <li>{{ msg|safe }}</li>
           {% endfor %}
         </ul>
       {% endif %}
@@ -87,6 +151,10 @@
     </form>
 
     <a href="{{ url_for('index') }}" class="back">← 메인으로</a>
+  </div>
+
+  <div class="eng-footer">
+    Industrial &amp; Data Engineering, Hongik University
   </div>
 </body>
 </html>
