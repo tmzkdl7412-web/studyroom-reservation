@@ -363,7 +363,7 @@ def extend_page():
         end_time = datetime.strptime(f"{res.date} {start_hour}:00", "%Y-%m-%d %H:%M")
         end_time = end_time.replace(tzinfo=KST) + timedelta(hours=int(res.duration))  # ✅ 타임존 적용
 
-        if not (end_time - timedelta(minutes=20) <= now <= end_time):
+        if not (end_time - timedelta(minutes=50) <= now <= end_time):
             safe_flash("⚠️ 예약 종료 20분 전부터만 연장할 수 있습니다.")
             return redirect(url_for("extend_page"))
 
