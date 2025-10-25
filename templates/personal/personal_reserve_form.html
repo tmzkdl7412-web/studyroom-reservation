@@ -8,73 +8,91 @@
       font-family: 'Noto Sans KR', sans-serif;
       margin: 0;
       background: #f7f9fc;
+      height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center; /* ✅ 중앙정렬 */
     }
-    .wrap {
-      width: 90%;
-      max-width: 320px;
-      margin: 60px auto;
+
+    .container {
       background: white;
-      border-radius: 14px;
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
-      padding: 40px 50px;
+      border-radius: 20px;
+      box-shadow: 0 6px 20px rgba(0,0,0,0.08);
+      padding: 45px 60px;
+      width: 420px;
+      box-sizing: border-box;
     }
+
     h2 {
-      color: #0d47a1;
-      margin: 0 0 20px;
       text-align: center;
+      color: #001B4E;
+      font-size: 24px;
+      font-weight: 700;
+      margin-bottom: 14px;
     }
+
     p.meta {
       text-align: center;
-      color: #555;
-      font-size: 14px;
-      margin-top: -10px;
-      margin-bottom: 30px;
-      font-weight: 600;
-    }
-    form {
-      display: flex;
-      flex-direction: column;
-      gap: 15px;
-    }
-    label {
-      font-weight: 700;
       color: #333;
+      font-size: 15px;
+      margin-top: 0;
+      margin-bottom: 25px;
     }
-    input, select {
-      width: 100%;
-      padding: 12px 14px;
-      border: 1px solid #dcdcdc;
-      border-radius: 8px;
+
+    label {
+      display: block;
+      margin-top: 14px;
+      font-weight: 600;
+      color: #001B4E;
       font-size: 15px;
     }
-    button {
-      background: #1976d2;
-      color: #fff;
-      border: none;
+
+    input, select {
+      width: 100%;
+      padding: 10px 12px;
+      margin-top: 6px;
+      border: 1px solid #ccc;
       border-radius: 8px;
-      padding: 12px 0;
+      font-size: 15px;
+      box-sizing: border-box;
+    }
+
+    button {
+      margin-top: 26px;
+      width: 100%;
+      padding: 13px;
+      border: none;
+      border-radius: 10px;
+      background-color: #1557c0;
+      color: white;
       font-size: 16px;
       font-weight: 700;
       cursor: pointer;
       transition: 0.2s;
     }
-    button:hover { background: #0d47a1; }
-    a.back {
-      display: inline-block;
-      margin-top: 10px;
-      color: #1976d2;
-      text-decoration: none;
-      font-size: 14px;
+
+    button:hover {
+      background-color: #0d47a1;
     }
-    a.back:hover { text-decoration: underline; }
+
+    .back {
+      display: block;
+      text-align: center;
+      margin-top: 18px;
+      color: #1557c0;
+      text-decoration: none;
+      font-weight: 500;
+    }
+
+    .back:hover {
+      text-decoration: underline;
+    }
   </style>
 </head>
 <body>
-  <div class="wrap">
+  <div class="container">
     <h2>예약 정보 입력</h2>
-    {% if room %}
-      <p class="meta">▶ 프로젝트실 {{ room }}, {{ date }} {{ "%02d:00" % hour }} 시작</p>
-    {% elif seat %}
+    {% if seat %}
       <p class="meta">▶ 개인석 {{ seat }}, {{ date }} {{ "%02d:00" % hour }} 시작</p>
     {% else %}
       <p class="meta">▶ {{ date }} {{ "%02d:00" % hour }} 시작</p>
@@ -85,22 +103,18 @@
       <input type="hidden" name="date" value="{{ date }}">
       <input type="hidden" name="hour" value="{{ hour }}">
 
-      <!-- ✅ 이름: 한글 2자 이상만 허용 -->
       <label>이름</label>
       <input type="text" name="leader_name" placeholder="예: 김산데"
              required pattern="[가-힣]{2,}" title="이름은 한글 2자 이상으로 입력해주세요.">
 
-      <!-- ✅ 학번: 알파벳 1글자 + 숫자 6자리 -->
       <label>학번</label>
       <input type="text" name="leader_id" placeholder="예: A123456"
              required pattern="[A-Za-z]{1}[0-9]{6}" title="학번 형식은 A123456과 같이 입력해주세요.">
 
-      <!-- ✅ 전화번호: 010-0000-0000 형식만 허용 -->
       <label>전화번호</label>
       <input type="text" name="leader_phone" placeholder="예: 010-1234-5678"
              required pattern="^010-[0-9]{4}-[0-9]{4}$" title="전화번호 형식은 010-1234-5678로 입력해주세요.">
 
-      <!-- ✅ 이용시간 -->
       <label>이용시간 (시간 단위, 1~3시간)</label>
       <select name="duration" required>
         <option value="1">1시간</option>
