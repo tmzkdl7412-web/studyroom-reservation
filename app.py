@@ -583,6 +583,9 @@ def cancel_all_confirm():
 def cancel_all_result():
     return render_template("cancel_all_result.html")
 
+@app.route("/cooling")
+def cooling():
+    return redirect("http://203.249.68.52/")
 
 # ---------------- 실행 ----------------
 if __name__ == "__main__":
