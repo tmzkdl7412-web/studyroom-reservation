@@ -1,11 +1,11 @@
 from flask import render_template, request, redirect, url_for, flash, session
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from sqlalchemy import cast, Integer
 from db import create_app, db
 from db.models import Reservation, PersonalReservation
 
 app = create_app()
-
+KST = timezone(timedelta(hours=9))
 # ---------------- 유틸 ----------------
 def make_days(n=7):
     """✅ 오늘부터 n일치 날짜 리스트 생성 (예: 오늘이 25일이면 25,26,27...)"""
@@ -326,7 +326,7 @@ def personal_reserve():
 # -------------------------------
 @app.route("/extend_page", methods=["GET", "POST"])
 def extend_page():
-    now = datetime.now()
+    now = datetime.now(KST)
     today = now.strftime("%Y-%m-%d")
 
     if request.method == "POST":
@@ -378,7 +378,7 @@ def extend_select():
     type_ = request.form.get("type")
     leader_id = request.form.get("leader_id")
 
-    now = datetime.now()
+    now = datetime.now(KST)
     today = now.strftime("%Y-%m-%d")
 
     if type_ == "group":
@@ -401,7 +401,7 @@ def extend_confirm():
     leader_id = request.form.get("leader_id")
     extend_hours = int(request.form.get("extend_hours", 1))  # 1 또는 2
     type_ = request.form.get("type")
-    now = datetime.now()
+    now = datetime.now(KST)
     today = now.strftime("%Y-%m-%d")
 
     # ✅ 예약 찾기
