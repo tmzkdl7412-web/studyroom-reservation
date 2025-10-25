@@ -1,5 +1,54 @@
-<div class="card">
-  <h2 style="color:#1557c0;">✅ {{ extend_hours }}시간 연장되었습니다!</h2>
-  <p>예약 시간이 성공적으로 연장되었습니다.</p>
-  <a href="{{ url_for('index') }}" class="btn btn-primary">홈으로 가기</a>
-</div>
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <title>연장 완료</title>
+  <style>
+    body {
+      font-family: 'Noto Sans KR', sans-serif;
+      background-color: #f6f9fc;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      margin: 0;
+    }
+    .card {
+      background: #fff;
+      padding: 50px 80px;
+      border-radius: 18px;
+      box-shadow: 0 4px 16px rgba(0,0,0,0.08);
+      text-align: center;
+    }
+    h2 {
+      color: #1557c0;
+      margin-bottom: 20px;
+      font-size: 24px;
+    }
+    p {
+      font-size: 17px;
+      color: #333;
+      margin-bottom: 40px;
+    }
+    a.btn {
+      background-color: #1557c0;
+      color: #fff;
+      padding: 12px 36px;
+      border-radius: 8px;
+      text-decoration: none;
+      font-weight: 600;
+      transition: 0.2s;
+    }
+    a.btn:hover {
+      background-color: #003b95;
+    }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <h2>✅ {{ extend_hours }}시간 연장되었습니다!</h2>
+    <p>예약이 성공적으로 연장되었습니다.<br>이용을 계속 진행해주세요.</p>
+    <a href="{{ url_for('index') }}" class="btn">홈으로 가기</a>
+  </div>
+</body>
+</html>
