@@ -23,44 +23,55 @@
       z-index: 100;
     }
 
+    /* ✅ “메인으로 / 문의사항” 버튼 */
+    .home-btn, .contact-btn {
+      display: inline-block;
+      padding: 8px 16px;
+      border-radius: 8px;
+      text-decoration: none;
+      font-weight: 600;
+      font-size: 15px;
+      transition: 0.2s;
+    }
+    .home-btn {
+      background: #1565c0;
+      color: white;
+    }
+    .home-btn:hover { background: #0d47a1; }
+
+    .contact-btn {
+      background: #1a73e8;
+      color: white;
+    }
+    .contact-btn:hover { background: #0d47a1; }
+
+    /* ✅ 탭 */
     .tabs {
       display: flex;
       justify-content: center;
       flex-grow: 1;
+      gap: 40px;
     }
 
     .tabs a {
-      margin: 0 25px;
+      padding: 8px 20px;
+      border-radius: 8px;
       text-decoration: none;
-      color: #00205B;
       font-weight: 700;
       font-size: 18px;
-      padding-bottom: 6px;
-      border-bottom: 3px solid transparent;
       transition: 0.2s;
+      color: #00205B;
+      background: transparent;
+      border: 2px solid transparent;
     }
 
-    .tabs a.active { border-color: #00205B; }
-    .tabs a:hover { opacity: 0.8; }
-
-    a.contact {
+    /* ✅ 현재 클릭된 탭 강조 */
+    .tabs a.active {
+      background: #e8f0fe;
+      border-color: #1a73e8;
       color: #1a73e8;
-      text-decoration: none;
-      font-weight: 600;
-      font-size: 15px;
+      box-shadow: 0 0 8px rgba(26, 115, 232, 0.3);
     }
-
-    a.contact:hover { text-decoration: underline; }
-
-    a.home {
-      color: #1a73e8;
-      text-decoration: none;
-      font-weight: 600;
-      font-size: 15px;
-      margin-right: auto;
-    }
-
-    a.home:hover { text-decoration: underline; }
 
     h2 { color: #0d47a1; margin: 24px 0 10px; text-align: center; }
 
@@ -102,8 +113,8 @@
 
     /* ✅ 선택된 방 강조 */
     .room.active {
-      background: #e8f0fe; /* 연한 파랑 */
-      border: 3px solid #1a73e8; /* 진한 파랑 */
+      background: #e8f0fe;
+      border: 3px solid #1a73e8;
       box-shadow: 0 0 12px rgba(26, 115, 232, 0.4);
       transform: scale(1.02);
     }
@@ -203,12 +214,15 @@
 
 <body>
   <header>
-    <a href="/" class="home">← 메인으로</a>
+    <!-- ✅ 색깔 있는 버튼 형태로 -->
+    <a href="/" class="home-btn">← 메인으로</a>
+
     <div class="tabs">
       <a href="/room_detail?room=1" class="{{ 'active' if room == '1' else '' }}">프로젝트실 1</a>
       <a href="/room_detail?room=2" class="{{ 'active' if room == '2' else '' }}">프로젝트실 2</a>
     </div>
-    <a href="/contact" class="contact">문의사항</a>
+
+    <a href="/contact" class="contact-btn">문의사항</a>
   </header>
 
   <main>
@@ -218,7 +232,6 @@
     <div class="layout">
       <div class="building">
         <div class="rooms">
-          <!-- ✅ 현재 선택된 방만 강조 -->
           <div class="room left {% if room == '2' %}active{% endif %}">
             <h3>프로젝트실 2</h3>
             <div class="table"></div>
