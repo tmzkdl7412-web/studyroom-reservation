@@ -348,9 +348,6 @@ def extend_page():
             (cast(PersonalReservation.hour, Integer) + cast(PersonalReservation.duration, Integer)) > now.hour
         ).first()
 
-        if group and personal:
-            return render_template("extend_select.html", group=group, personal=personal)
-
         res = group or personal
         if not res:
             safe_flash("금일 연장 가능한 예약이 없습니다.<br>예약 종료 20분 전부터만 연장이 가능합니다.")
@@ -368,42 +365,6 @@ def extend_page():
 
     return render_template("extend_page.html")
     
-@app.route("/extend_select", methods=["POST"])
-def extend_select():
-    type_ = request.form.get("type")  # "group" or "personal"
-    leader_id = request.form.get("leader_id", "").strip().upper()
-
-    now = datetime.now(KST)
-    today = now.strftime("%Y-%m-%d")
-
-    if type_ == "group":
-        res = Reservation.query.filter(
-            Reservation.leader_id == leader_id, Reservation.date == today,
-            cast(Reservation.hour, Integer) <= now.hour,
-            (cast(Reservation.hour, Integer) + cast(Reservation.duration, Integer)) > now.hour
-        ).first()
-        res_type = "group"
-    else:
-        res = PersonalReservation.query.filter(
-            PersonalReservation.leader_id == leader_id, PersonalReservation.date == today,
-            cast(PersonalReservation.hour, Integer) <= now.hour,
-            (cast(PersonalReservation.hour, Integer) + cast(PersonalReservation.duration, Integer)) > now.hour
-        ).first()
-        res_type = "personal"
-
-    if not res:
-        safe_flash("연장 가능한 예약을 찾을 수 없습니다.")
-        return redirect(url_for("extend_page"))
-
-    start_hour = int(res.hour)
-    start_dt = datetime.strptime(f"{res.date} {start_hour}:00", "%Y-%m-%d %H:%M").replace(tzinfo=KST)
-    elapsed = now - start_dt
-    elapsed_str = f"{elapsed.seconds // 3600}시간 {(elapsed.seconds % 3600) // 60}분"
-
-    return render_template("extend_confirm.html", res=res, res_type=res_type, elapsed=elapsed_str)
-
-
-
 @app.route("/extend_confirm", methods=["POST"])
 def extend_confirm():
     """
