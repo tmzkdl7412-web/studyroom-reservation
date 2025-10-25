@@ -15,13 +15,13 @@
       position: relative;
     }
 
-    /* 상단 & 하단 남색 라인 */
+    /* ✅ 상단 & 하단 네이비 라인 */
     body::before,
     body::after {
       content: "";
       display: block;
-      height: 8px;
-      background: linear-gradient(to right, #001B4E, #002C7A, #001B4E);
+      height: 6px;
+      background: linear-gradient(to right, #001B4E, #1557c0);
       position: fixed;
       left: 0;
       width: 100%;
@@ -43,6 +43,7 @@
       text-align: center;
       box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
       letter-spacing: 0.5px;
+      margin-top: 6px; /* ✅ 상단 라인과 자연스럽게 구분 */
     }
 
     header h1 {
@@ -96,7 +97,7 @@
     }
 
     .available {
-      background-color: #002C7A;
+      background-color: #1557c0;
       color: #fff;
       border: none;
       border-radius: 8px;
@@ -112,17 +113,19 @@
 
     footer {
       text-align: center;
-      padding: 25px 0;
+      padding: 14px 0;
       color: white;
       font-size: 14px;
-      background-color: #001B4E;
-      margin-top: 60px;
+      background: linear-gradient(to right, #001B4E, #1557c0);
+      position: fixed;
+      bottom: 0;
+      width: 100%;
       letter-spacing: 0.3px;
     }
 
     /* 버튼 공통 */
     .btn-primary {
-      background-color: #002C7A;
+      background-color: #1557c0;
       color: white;
       border: none;
       border-radius: 8px;
@@ -154,17 +157,20 @@
 </head>
 
 <body>
+  <!-- ✅ 상단 헤더 -->
   <header>
     <h1>산업·데이터공학과 스터디룸 예약 시스템</h1>
   </header>
 
+  <!-- ✅ 본문 블록 -->
   <div class="container">
     {% block content %}
     {% endblock %}
   </div>
 
+  <!-- ✅ 하단 학과명 라인 -->
   <footer>
-    ⓒ 2025 Hongik Univ. Industrial & Data Engineering Dept.
+    Industrial &amp; Data Engineering, Hongik University
   </footer>
 </body>
 </html>
