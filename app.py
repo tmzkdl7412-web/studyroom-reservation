@@ -398,65 +398,32 @@ def extend_select():
 
 @app.route("/extend_confirm", methods=["POST"])
 def extend_confirm():
-    leader_id = request.form.get("leader_id")
-    extend_hours = int(request.form.get("extend_hours", 1))  # 1 또는 2
-    type_ = request.form.get("type")
+    leader_name = request.form.get("leader_name").strip()
+    leader_id = request.form.get("leader_id").strip().upper()
+    extend_hours = int(request.form.get("extend_hours", 0))
+
+    # ✅ DB에서 예약 조회
+    reservation = PersonalReservation.query.filter_by(
+        leader_name=leader_name, leader_id=leader_id
+    ).first()
+
+    if not reservation:
+        safe_flash("⚠️ 예약을 찾을 수 없습니다.")
+        return redirect(url_for("extend"))
+
     now = datetime.now(KST)
-    today = now.strftime("%Y-%m-%d")
+    end_time = datetime.combine(reservation.date, datetime.min.time()) + timedelta(hours=reservation.hour + reservation.duration)
+    remaining = (end_time - now).total_seconds() / 60
 
-    # ✅ 예약 찾기
-    if type_ == "group":
-        res = Reservation.query.filter_by(leader_id=leader_id, date=today).first()
-    else:
-        res = PersonalReservation.query.filter_by(leader_id=leader_id, date=today).first()
+    # ✅ 20분 전에만 연장 가능
+    if remaining > 20:
+        return render_template("extend_blocked.html", remaining=int(remaining))
 
-    if not res:
-        safe_flash("❌ 예약 정보를 찾을 수 없습니다.")
-        return redirect(url_for("extend_page"))
+    # ✅ 실제 연장 처리
+    reservation.duration += extend_hours
+    db.session.commit()
 
-    start_hour = int(res.hour)
-    current_end = start_hour + int(res.duration)
-    new_end = current_end + extend_hours
-
-    # ✅ 종료 20분 전부터만 연장 가능
-    end_time = datetime.strptime(f"{res.date} {current_end}:00", "%Y-%m-%d %H:%M")
-    end_time = end_time.replace(tzinfo=KST)  # ✅ 타임존 추가
-
-    if not (end_time - timedelta(minutes=20) <= now <= end_time):
-        safe_flash("⚠️ 예약 종료 20분 전부터만 연장할 수 있습니다.")
-        return redirect(url_for("extend_page"))
-
-    # ✅ 다음 시간대 예약 겹침 방지
-    if hasattr(res, "room"):  # 단체실
-        overlap = Reservation.query.filter(
-            Reservation.date == res.date,
-            Reservation.room == res.room,
-            cast(Reservation.hour, Integer) < new_end,
-            (cast(Reservation.hour, Integer) + cast(Reservation.duration, Integer)) > current_end,
-            Reservation.id != res.id
-        ).first()
-    else:  # 개인석
-        overlap = PersonalReservation.query.filter(
-            PersonalReservation.date == res.date,
-            PersonalReservation.seat == res.seat,
-            cast(PersonalReservation.hour, Integer) < new_end,
-            (cast(PersonalReservation.hour, Integer) + cast(PersonalReservation.duration, Integer)) > current_end,
-            PersonalReservation.id != res.id
-        ).first()
-
-    if overlap:
-        safe_flash("⚠️ 다음 시간대에 이미 예약이 있어 연장할 수 없습니다.")
-        return redirect(url_for("extend_page"))
-
-    # ✅ 연장 처리 후 DB 반영
-    res.duration = str(int(res.duration) + extend_hours)
-    db.session.commit()  # 🧩 commit 확실히 실행
-
-    return render_template(
-        "extend_done.html",
-        res=res,
-        extend_hours=extend_hours
-    )
+    return render_template("extend_success.html", extend_hours=extend_hours)
 
 # -------------------------------
 # 🔸 예약 취소
