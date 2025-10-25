@@ -80,6 +80,19 @@
       margin-bottom: 6px;
     }
 
+    /* ✅ 상하단 네이비 라인 */
+    body::before,
+    body::after {
+      content: "";
+      height: 6px;
+      width: 100%;
+      background: linear-gradient(to right, #001B4E, #1557c0);
+      position: fixed;
+      left: 0;
+      z-index: 9999;
+    }
+    body::before { top: 0; }
+    body::after { bottom: 0; }
   </style>
 </head>
 <body>
@@ -99,5 +112,20 @@
       <button type="submit">돌아가기</button>
     </form>
   </div>
+
+  <!-- ✅ 하단 학과명 라인 -->
+  <footer style="
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    background: linear-gradient(to right,#001B4E,#1557c0);
+    color: white;
+    text-align: center;
+    padding: 10px 0;
+    font-size: 13px;
+  ">
+    Industrial &amp; Data Engineering, Hongik University
+  </footer>
 </body>
 </html>
