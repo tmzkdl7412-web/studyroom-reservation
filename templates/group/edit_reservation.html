@@ -5,88 +5,156 @@
 <meta charset="utf-8">
 <title>예약 변경</title>
 <style>
-  body{font-family:"Noto Sans KR",sans-serif;padding:30px;margin:0;background:#f7f9fc}
-  .card{max-width:600px;margin:0 auto;background:#fff;padding:24px;border-radius:8px;box-shadow:0 6px 18px rgba(2,6,23,.06)}
-  label{display:block;margin-top:12px;font-weight:600}
-  input, select{width:100%;padding:10px;margin-top:6px;border:1px solid #ddd;border-radius:6px}
-  .row{display:flex;gap:12px}
-  .row > *{flex:1}
-  button{margin-top:16px;padding:10px 18px;border-radius:8px;border:none;background:#1a73e8;color:#fff;font-weight:700}
-  .hint{font-size:13px;color:#666;margin-top:6px}
+  body {
+    font-family: "Noto Sans KR", sans-serif;
+    padding: 30px;
+    margin: 0;
+    background: #f7f9fc;
+    position: relative;
+  }
 
-  /* ✅ 상하단 남색 라인 */
+  .card {
+    max-width: 600px;
+    margin: 80px auto;
+    background: #fff;
+    padding: 32px 28px;
+    border-radius: 16px;
+    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.08);
+  }
+
+  h2 {
+    text-align: center;
+    color: #001B4E;
+    font-weight: 700;
+    margin-top: 0;
+    margin-bottom: 12px;
+  }
+
+  label {
+    display: block;
+    margin-top: 14px;
+    font-weight: 600;
+    color: #001B4E;
+  }
+
+  input, select {
+    width: 100%;
+    padding: 10px 12px;
+    margin-top: 6px;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    font-size: 15px;
+    box-sizing: border-box;
+  }
+
+  .row {
+    display: flex;
+    gap: 12px;
+  }
+  .row > * {
+    flex: 1;
+  }
+
+  button {
+    margin-top: 22px;
+    padding: 12px;
+    border-radius: 10px;
+    border: none;
+    background: #1557c0;
+    color: #fff;
+    font-weight: 700;
+    font-size: 16px;
+    width: 100%;
+    cursor: pointer;
+    transition: 0.2s;
+  }
+
+  button:hover {
+    background-color: #0d47a1;
+  }
+
+  .hint {
+    font-size: 13px;
+    color: #666;
+    margin-top: 10px;
+    text-align: center;
+  }
+
+  /* ✅ 상·하단 네이비 라인 (index.html 동일) */
   body::before,
   body::after {
     content: "";
     height: 30px;
     width: 100%;
-    background: linear-gradient(to right, #001B4E, #1557c0);
+    background: linear-gradient(to right, #001B4E, #003C9E, #001B4E);
     position: fixed;
     left: 0;
     z-index: 9999;
   }
   body::before { top: 0; }
   body::after { bottom: 0; }
+
+  /* ✅ 학과명 푸터 (index.html 동일) */
+  .eng-footer {
+    position: fixed;
+    bottom: 2px;
+    left: 0;
+    width: 100%;
+    text-align: center;
+    font-size: 20px;
+    color: white;
+    z-index: 10000;
+    pointer-events: none;
+  }
 </style>
 </head>
 <body>
-<div class="card">
-  <h2>예약 변경</h2>
-  <p class="hint">대표자 이름/학번/전화로 본인 확인 후 변경 가능합니다.</p>
-  <form method="post" action="{{ url_for('edit_reservation') }}">
-    <input type="hidden" name="id" value="{{ reservation.id }}">
+  <div class="card">
+    <h2>예약 변경</h2>
+    <p class="hint">대표자 이름 / 학번 / 전화로 본인 확인 후 변경 가능합니다.</p>
+    <form method="post" action="{{ url_for('edit_reservation') }}">
+      <input type="hidden" name="id" value="{{ reservation.id }}">
 
-    <label>대표자 이름
-      <input type="text" name="leader_name" value="{{ reservation.leader_name }}" required>
-    </label>
+      <label>대표자 이름
+        <input type="text" name="leader_name" value="{{ reservation.leader_name }}" required>
+      </label>
 
-    <label>대표자 학번 (예: C221087)
-      <input type="text" name="leader_id" value="{{ reservation.leader_id }}" style="text-transform:uppercase" required>
-    </label>
+      <label>대표자 학번 (예: C221087)
+        <input type="text" name="leader_id" value="{{ reservation.leader_id }}" style="text-transform:uppercase" required>
+      </label>
 
-    <label>대표자 전화번호
-      <input type="text" name="leader_phone" value="{{ reservation.leader_phone }}">
-    </label>
+      <label>대표자 전화번호
+        <input type="text" name="leader_phone" value="{{ reservation.leader_phone }}">
+      </label>
 
-    <label>변경할 날짜
-      <select name="date" required>
-        {% for d in allowed_days %}
-          <option value="{{ d }}" {% if d == reservation.date %}selected{% endif %}>{{ d }}</option>
-        {% endfor %}
-      </select>
-    </label>
+      <label>변경할 날짜
+        <select name="date" required>
+          {% for d in allowed_days %}
+            <option value="{{ d }}" {% if d == reservation.date %}selected{% endif %}>{{ d }}</option>
+          {% endfor %}
+        </select>
+      </label>
 
-    <div class="row">
-      <div>
-        <label>시작 시간 (0-23)
-          <input type="number" name="hour" min="0" max="23" value="{{ reservation.hour }}" required>
-        </label>
+      <div class="row">
+        <div>
+          <label>시작 시간 (0-23)
+            <input type="number" name="hour" min="0" max="23" value="{{ reservation.hour }}" required>
+          </label>
+        </div>
+        <div>
+          <label>기간(시간)
+            <input type="number" name="duration" min="1" max="24" value="{{ reservation.duration or 1 }}" required>
+          </label>
+        </div>
       </div>
-      <div>
-        <label>기간(시간)
-          <input type="number" name="duration" min="1" max="24" value="{{ reservation.duration or 1 }}" required>
-        </label>
-      </div>
-    </div>
 
-    <button type="submit">변경 제출</button>
-  </form>
-  <p class="hint">변경 가능 날짜는 오늘 포함 3일치만 가능합니다.</p>
-</div>
+      <button type="submit">변경 제출</button>
+    </form>
+    <p class="hint">변경 가능 날짜는 오늘 포함 3일치만 가능합니다.</p>
+  </div>
 
-<!-- ✅ 하단 학과명 글씨 -->
-<footer style="
-  background: linear-gradient(to right,#001B4E,#1557c0);
-  color: white;
-  text-align: center;
-  padding: 10px 0;
-  font-size: 13px;
-  position: fixed;
-  bottom: 0;
-  left: 0;
-  width: 100%;
-">
-  Industrial &amp; Data Engineering, Hongik University
-</footer>
+  <div class="eng-footer">
+    Industrial &amp; Data Engineering, Hongik University
+  </div>
 </body>
 </html>
