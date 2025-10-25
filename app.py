@@ -7,19 +7,10 @@ from db.models import Reservation, PersonalReservation
 app = create_app()
 
 # ---------------- 유틸 ----------------
-def make_days(n=7):  # 원래 7일치 보여주던 거면 이 숫자 그대로 유지해도 됨
-    now = datetime.now()
-
-    # ✅ 자정(00시) 이후에는 어제 포함되지 않도록 기준일을 하루 미룸
-    if now.hour == 0:
-        base = now + timedelta(days=1)
-    else:
-        base = now
-
-    base = base.replace(hour=0, minute=0, second=0, microsecond=0)
-
-    # ✅ 오늘이 아닌 '내일부터 n일치' 날짜 리스트 생성
-    return [(base + timedelta(days=i+1)).strftime("%Y-%m-%d") for i in range(n)]
+def make_days(n=7):
+    """✅ 오늘부터 n일치 날짜 리스트 생성 (예: 오늘이 25일이면 25,26,27...)"""
+    base = datetime.now().replace(hour=0, minute=0, second=0, microsecond=0)
+    return [(base + timedelta(days=i)).strftime("%Y-%m-%d") for i in range(n)]
 
 def hours_24():
     return list(range(24))
