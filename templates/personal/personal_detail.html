@@ -19,6 +19,7 @@
     background: #f7f9fc;
   }
 
+  /* ✅ 헤더 */
   header {
     background: #fff;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
@@ -31,34 +32,55 @@
     z-index: 100;
   }
 
+  /* ✅ 메인/문의사항 버튼 */
+  .home-btn, .contact-btn {
+    display: inline-block;
+    padding: 8px 16px;
+    border-radius: 8px;
+    text-decoration: none;
+    font-weight: 600;
+    font-size: 15px;
+    transition: 0.2s;
+  }
+  .home-btn {
+    background: #1565c0;
+    color: white;
+  }
+  .home-btn:hover { background: #0d47a1; }
+
+  .contact-btn {
+    background: #1a73e8;
+    color: white;
+  }
+  .contact-btn:hover { background: #0d47a1; }
+
+  /* ✅ 탭 (개인석 번호들) */
   .tabs {
     display: flex;
     justify-content: center;
     flex-grow: 1;
+    gap: 14px;
   }
 
   .tabs a {
-    margin: 0 18px;
+    padding: 6px 12px;
+    border-radius: 8px;
     text-decoration: none;
-    color: #00205B;
     font-weight: 700;
-    font-size: 17px;
-    padding-bottom: 6px;
-    border-bottom: 3px solid transparent;
+    font-size: 16px;
     transition: 0.2s;
+    color: #00205B;
+    background: transparent;
+    border: 2px solid transparent;
   }
 
-  .tabs a.active { border-color: #00205B; }
-  .tabs a:hover { opacity: 0.85; }
-
-  a.home, a.contact {
+  /* ✅ 현재 클릭된 좌석 강조 */
+  .tabs a.active {
+    background: #e8f0fe;
+    border-color: #1a73e8;
     color: #1a73e8;
-    text-decoration: none;
-    font-weight: 600;
-    font-size: 15px;
+    box-shadow: 0 0 8px rgba(26, 115, 232, 0.3);
   }
-
-  a.home:hover, a.contact:hover { text-decoration: underline; }
 
   h2 { color: #0d47a1; margin: 22px 0 10px; text-align: center; }
 
@@ -102,6 +124,7 @@
     transition: 0.2s;
   }
 
+  /* ✅ 현재 좌석 강조 */
   .seat.current {
     background: #1976d2;
     color: #fff;
@@ -109,7 +132,7 @@
     box-shadow: 0 6px 14px rgba(25, 118, 210, 0.3);
   }
 
-  /* ✅ 벽 (대칭 유지) */
+  /* ✅ 벽 */
   .left-col::before, .right-col::after {
     content: "";
     position: absolute;
@@ -119,14 +142,13 @@
     background: #1a73e8;
     border-radius: 3px;
   }
-
   .left-col::before { left: calc(var(--wall-gap) * -1); }
   .right-col::after { right: calc(var(--wall-gap) * -1); }
 
   /* ✅ 문 */
   .door {
     position: absolute;
-    right: calc(var(--wall-gap) );
+    right: calc(var(--wall-gap));
     bottom: 48px;
     border: 2px solid #1a73e8;
     border-radius: 4px;
@@ -162,14 +184,14 @@
     border-radius: 14px;
     overflow: hidden;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
-    table-layout: fixed; /* 셀 크기 고정 */
+    table-layout: fixed;
   }
 
   th, td {
     border: 1px solid #eee;
     text-align: center;
     font-size: 14px;
-    height: 40px; /* ✅ 셀 높이 고정 */
+    height: 40px;
     padding: 4px;
   }
 
@@ -198,13 +220,15 @@
 
 <body>
 <header>
-  <a href="/" class="home">← 메인으로</a>
+  <a href="/" class="home-btn">← 메인으로</a>
+
   <div class="tabs">
     {% for i in range(1,8) %}
       <a href="/personal_detail?seat={{ i }}" class="{{ 'active' if seat == i|string else '' }}">개인석 {{ i }}</a>
     {% endfor %}
   </div>
-  <a href="/contact" class="contact">문의사항</a>
+
+  <a href="/contact" class="contact-btn">문의사항</a>
 </header>
 
 <main>
@@ -215,16 +239,12 @@
       <div class="seat-grid">
         <div class="seat left-col  {% if seat|int == 7 %}current{% endif %}">7</div>
         <div class="seat right-col {% if seat|int == 3 %}current{% endif %}">3</div>
-
         <div class="seat left-col  {% if seat|int == 6 %}current{% endif %}">6</div>
         <div class="seat right-col {% if seat|int == 2 %}current{% endif %}">2</div>
-
         <div class="seat left-col  {% if seat|int == 5 %}current{% endif %}">5</div>
         <div class="seat right-col {% if seat|int == 1 %}current{% endif %}">1</div>
-
         <div class="seat left-col  {% if seat|int == 4 %}current{% endif %}">4</div>
       </div>
-
       <div class="door">문</div>
       <div class="hallway">복도</div>
     </div>
