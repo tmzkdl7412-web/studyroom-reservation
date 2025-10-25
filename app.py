@@ -333,44 +333,58 @@ def extend_page():
         name = request.form.get("leader_name", "").strip()
         sid = request.form.get("leader_id", "").strip().upper()
 
+        # 🔹 현재 진행 중인 예약(단체실)
         group = Reservation.query.filter(
-            Reservation.leader_name == name, Reservation.leader_id == sid,
+            Reservation.leader_name == name,
+            Reservation.leader_id == sid,
             Reservation.date == today,
             cast(Reservation.hour, Integer) <= now.hour,
             (cast(Reservation.hour, Integer) + cast(Reservation.duration, Integer)) > now.hour
         ).first()
 
+        # 🔹 현재 진행 중인 예약(개인석)
         personal = PersonalReservation.query.filter(
-            PersonalReservation.leader_name == name, PersonalReservation.leader_id == sid,
+            PersonalReservation.leader_name == name,
+            PersonalReservation.leader_id == sid,
             PersonalReservation.date == today,
             cast(PersonalReservation.hour, Integer) <= now.hour,
             (cast(PersonalReservation.hour, Integer) + cast(PersonalReservation.duration, Integer)) > now.hour
         ).first()
 
+        # 🔸 둘 다 있을 경우 → 선택 페이지로 이동
         if group and personal:
             return render_template("extend_select.html", group=group, personal=personal)
 
+        # 🔸 하나만 존재할 경우
         res = group or personal
-        if not res:
-            safe_flash("금일 연장 가능한 예약이 없습니다.<br> 예약 종료 20분 전부터 연장이 가능합니다.")
+
+        # ✅ None 가드 추가 (여기가 핵심 수정)
+        if res is None:
+            safe_flash("금일 연장 가능한 예약이 없습니다.<br> 예약 종료 20분 전부터만 가능합니다.")
             return redirect(url_for("extend_page"))
 
+        # ✅ 한 번만 연장 가능
         if int(res.duration) > 3:
             safe_flash("⚠️ 이미 한 번 연장된 예약입니다. 추가 연장은 불가합니다.")
             return redirect(url_for("extend_page"))
 
+        # 🔹 예약 종료 시각 계산
         start_hour = int(res.hour)
         end_time = datetime.strptime(f"{res.date} {start_hour}:00", "%Y-%m-%d %H:%M") + timedelta(hours=int(res.duration))
 
+        # ✅ 연장 가능 시간대 확인 (종료 50분 전~종료 시점)
         if not (end_time - timedelta(minutes=50) <= now <= end_time):
             safe_flash("⚠️ 예약 종료 20분 전부터만 연장할 수 있습니다.")
             return redirect(url_for("extend_page"))
 
+        # 🔹 경과 시간 계산
         elapsed = now - datetime.strptime(f"{res.date} {start_hour}:00", "%Y-%m-%d %H:%M")
         elapsed_str = f"{elapsed.seconds // 3600}시간 {(elapsed.seconds % 3600) // 60}분"
 
+        # ✅ 확인 페이지 렌더링
         return render_template("extend_confirm.html", res=res, elapsed=elapsed_str)
 
+    # GET 요청 시 (폼 페이지)
     return render_template("extend_page.html")
 
 @app.route("/extend_select", methods=["POST"])
