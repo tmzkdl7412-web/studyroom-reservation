@@ -88,15 +88,15 @@
 </head>
 <body>
   <div class="container">
-    <h2>예약 취소</h2>
+    <h2>예약 취소 (단체=대표자)</h2>
     <form method="POST" action="/cancel_all">
-      <label for="leader_name">대표자 이름</label>
+      <label for="leader_name">이름</label>
       <input type="text" id="leader_name" name="leader_name" placeholder="예: 김홍익" required>
 
-      <label for="leader_id">대표자 학번</label>
+      <label for="leader_id">학번</label>
       <input type="text" id="leader_id" name="leader_id" placeholder="예: A123456" required>
 
-      <label for="leader_phone">대표자 전화번호</label>
+      <label for="leader_phone">전화번호</label>
       <input type="text" id="leader_phone" name="leader_phone" placeholder="예: 010-0000-0000" required>
 
       <button type="submit">예약 조회</button>
