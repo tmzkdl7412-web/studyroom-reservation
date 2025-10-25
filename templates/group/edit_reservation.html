@@ -5,7 +5,7 @@
 <meta charset="utf-8">
 <title>예약 변경</title>
 <style>
-  body{font-family:"Noto Sans KR",sans-serif;padding:30px}
+  body{font-family:"Noto Sans KR",sans-serif;padding:30px;margin:0;background:#f7f9fc}
   .card{max-width:600px;margin:0 auto;background:#fff;padding:24px;border-radius:8px;box-shadow:0 6px 18px rgba(2,6,23,.06)}
   label{display:block;margin-top:12px;font-weight:600}
   input, select{width:100%;padding:10px;margin-top:6px;border:1px solid #ddd;border-radius:6px}
@@ -13,6 +13,20 @@
   .row > *{flex:1}
   button{margin-top:16px;padding:10px 18px;border-radius:8px;border:none;background:#1a73e8;color:#fff;font-weight:700}
   .hint{font-size:13px;color:#666;margin-top:6px}
+
+  /* ✅ 상하단 남색 라인 추가 */
+  body::before,
+  body::after {
+    content: "";
+    height: 6px;
+    width: 100%;
+    background: linear-gradient(to right, #001B4E, #1557c0);
+    position: fixed;
+    left: 0;
+    z-index: 9999;
+  }
+  body::before { top: 0; }
+  body::after { bottom: 0; }
 </style>
 </head>
 <body>
@@ -59,5 +73,21 @@
   </form>
   <p class="hint">변경 가능 날짜는 오늘 포함 3일치만 가능합니다.</p>
 </div>
+
+<!-- ✅ 하단 학과명 표시 -->
+<footer style="
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  background: linear-gradient(to right, #001B4E, #1557c0);
+  color: white;
+  text-align: center;
+  padding: 10px 0;
+  font-size: 13px;
+  z-index: 10000;
+">
+  Industrial &amp; Data Engineering, Hongik University
+</footer>
 </body>
 </html>
