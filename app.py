@@ -517,7 +517,6 @@ def cancel_all_confirm():
         personal_reservations = PersonalReservation.query.filter_by(
             leader_name=leader_name, leader_id=leader_id
         ).order_by(PersonalReservation.date, cast(PersonalReservation.hour, Integer)).all()
-
         return render_template(
             "cancel_all_result.html",
             group_reservations=group_reservations,
@@ -531,33 +530,23 @@ def cancel_all_confirm():
 
     for item in selected_items:
         try:
-            # value 형식: "group_room_date_hour" 또는 "personal_seat_date_hour"
-            parts = item.split("_", 3)
-            if len(parts) != 4:
-                # 예상 형식이 아니면 스킵
-                print("⚠️ unexpected checkbox value:", item)
-                continue
-
-            type_, target, date, hour = parts[0], parts[1], parts[2], parts[3]
-            hour_int = int(hour)  # 포맷 차이 방지용
+            # ✅ value 형식: "group:3" 또는 "personal:7"
+            type_, id_str = item.split(":", 1)
+            target_id = int(id_str)
 
             if type_ == "group":
-                deleted = Reservation.query.filter(
-                    Reservation.room == target,
-                    Reservation.date == date,
-                    cast(Reservation.hour, Integer) == hour_int,   # ✅ 포맷 차이 무시
-                    Reservation.leader_name == leader_name,
-                    Reservation.leader_id == leader_id
+                deleted = Reservation.query.filter_by(
+                    id=target_id,
+                    leader_name=leader_name,
+                    leader_id=leader_id
                 ).delete(synchronize_session=False) or 0
                 group_deleted += deleted
 
             elif type_ == "personal":
-                deleted = PersonalReservation.query.filter(
-                    PersonalReservation.seat == target,
-                    PersonalReservation.date == date,
-                    cast(PersonalReservation.hour, Integer) == hour_int,  # ✅ 포맷 차이 무시
-                    PersonalReservation.leader_name == leader_name,
-                    PersonalReservation.leader_id == leader_id
+                deleted = PersonalReservation.query.filter_by(
+                    id=target_id,
+                    leader_name=leader_name,
+                    leader_id=leader_id
                 ).delete(synchronize_session=False) or 0
                 personal_deleted += deleted
 
@@ -572,7 +561,7 @@ def cancel_all_confirm():
     else:
         safe_flash("⚠️ 선택된 예약을 찾을 수 없거나 이미 삭제되었습니다.")
 
-    # ✅ 최신 DB 상태로 다시 조회해 화면 반영
+    # ✅ 삭제 후 남은 예약 다시 불러오기
     group_reservations = Reservation.query.filter_by(
         leader_name=leader_name, leader_id=leader_id
     ).order_by(Reservation.date, cast(Reservation.hour, Integer)).all()
@@ -589,7 +578,6 @@ def cancel_all_confirm():
         leader_id=leader_id,
         leader_phone=leader_phone
     )
-
 
 @app.route("/cancel_all_result")
 def cancel_all_result():
