@@ -12,6 +12,7 @@
       justify-content: center;
       align-items: center;
       height: 100vh;
+      position: relative;
     }
 
     .card {
@@ -29,7 +30,7 @@
     }
 
     h2 {
-      color: #0d47a1;
+      color: #001B4E;
       font-size: 22px;
       margin-bottom: 30px;
       letter-spacing: -0.3px;
@@ -77,12 +78,6 @@
       transform: translateY(-4px);
     }
 
-    .circle img {
-      width: 28px;
-      height: 28px;
-      margin-right: 8px;
-    }
-
     .info {
       margin-top: 20px;
       font-size: 15px;
@@ -91,13 +86,13 @@
     }
 
     .info strong {
-      color: #0d47a1;
+      color: #001B4E;
     }
 
     a.home {
       display: block;
       margin-top: 26px;
-      color: #1a73e8;
+      color: #1557c0;
       text-decoration: none;
       font-weight: 600;
       font-size: 15px;
@@ -105,6 +100,33 @@
 
     a.home:hover {
       text-decoration: underline;
+    }
+
+    /* ✅ 상하단 네이비 라인 (index.html 동일) */
+    body::before,
+    body::after {
+      content: "";
+      height: 30px;
+      width: 100%;
+      background: linear-gradient(to right, #001B4E, #003C9E, #001B4E);
+      position: fixed;
+      left: 0;
+      z-index: 9999;
+    }
+    body::before { top: 0; }
+    body::after { bottom: 0; }
+
+    /* ✅ 학과명 푸터 (index.html 동일) */
+    .eng-footer {
+      position: fixed;
+      bottom: 2px;
+      left: 0;
+      width: 100%;
+      text-align: center;
+      font-size: 20px;
+      color: white;
+      z-index: 10000;
+      pointer-events: none;
     }
   </style>
 </head>
@@ -115,10 +137,10 @@
 
     <div class="circle-buttons">
       <a href="https://pf.kakao.com/_exlnjxb" target="_blank" class="circle kakao">
-        <br>카카오톡
+        카카오톡
       </a>
       <a href="https://www.instagram.com/hongik_hide_2025" target="_blank" class="circle instagram">
-        <br>인스타그램
+        인스타그램
       </a>
     </div>
 
@@ -129,6 +151,10 @@
     </div>
 
     <a href="/" class="home">← 메인으로 돌아가기</a>
+  </div>
+
+  <div class="eng-footer">
+    Industrial &amp; Data Engineering, Hongik University
   </div>
 </body>
 </html>
