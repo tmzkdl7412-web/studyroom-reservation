@@ -1,9 +1,30 @@
 <!-- edit_success.html -->
-<!doctype html><html lang="ko">
-<head><meta charset="utf-8"><title>변경 성공</title></head>
-<body style="font-family:Noto Sans KR, sans-serif;padding:30px">
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <title>변경 성공</title>
+</head>
+<body style="font-family:'Noto Sans KR', sans-serif; padding:30px;">
+
+  <!-- ✅ 상단 네이비 라인 -->
+  <header style="height:6px; background:linear-gradient(to right,#001B4E,#1557c0);"></header>
+
   <h2>🆗 예약 변경 완료</h2>
   <p>룸: {{ reservation.room }} / 날짜: {{ reservation.date }} / 시작: {{ reservation.hour }}시 / 기간: {{ reservation.duration or 1 }}시간</p>
-  <a href="{{ url_for('room_detail') }}?room={{ reservation.room }}">예약 현황으로</a>
+
+  <a href="{{ url_for('room_detail') }}?room={{ reservation.room }}">← 예약 현황으로</a>
+
+  <!-- ✅ 하단 학과명 라인 -->
+  <footer style="
+    background:linear-gradient(to right,#001B4E,#1557c0);
+    color:white;
+    text-align:center;
+    padding:10px 0;
+    font-size:13px;
+    margin-top:40px;">
+    Industrial & Data Engineering, Hongik University
+  </footer>
+
 </body>
 </html>
