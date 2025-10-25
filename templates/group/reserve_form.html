@@ -2,60 +2,92 @@
 <html lang="ko">
 <head>
   <meta charset="UTF-8">
-  <title>예약 폼</title>
+  <title>예약 정보 입력</title>
   <style>
     body {
       font-family: 'Noto Sans KR', sans-serif;
       background-color: #f7f9fc;
       display: flex;
-      flex-direction: column;
-      align-items: center;
       justify-content: center;
-      padding: 40px;
+      align-items: center;
+      height: 100vh; /* ✅ 수직 중앙 정렬 */
+      margin: 0;
     }
+
     .container {
       background: white;
-      border-radius: 16px;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.08);
-      padding: 40px;
+      border-radius: 20px;
+      box-shadow: 0 6px 20px rgba(0,0,0,0.08);
+      padding: 45px 60px;
       width: 480px;
+      box-sizing: border-box;
     }
+
     h2 {
       text-align: center;
-      margin-bottom: 18px;
-      color: #1a237e;
+      margin-bottom: 14px;
+      color: #001B4E;
+      font-size: 24px;
+      font-weight: 700;
     }
-    p.meta { text-align:center; color:#333; font-size:14px; margin-top:0; }
+
+    p.meta {
+      text-align: center;
+      color: #333;
+      font-size: 15px;
+      margin-top: 0;
+      margin-bottom: 25px;
+    }
+
     label {
       display: block;
-      margin-top: 12px;
+      margin-top: 14px;
       font-weight: 600;
+      color: #001B4E;
+      font-size: 15px;
     }
+
     input, select {
       width: 100%;
       padding: 10px 12px;
       margin-top: 6px;
       border: 1px solid #ccc;
       border-radius: 8px;
-      font-size:14px;
+      font-size: 15px;
+      box-sizing: border-box;
     }
+
     button {
-      margin-top: 22px;
+      margin-top: 26px;
       width: 100%;
-      padding: 12px;
+      padding: 13px;
       border: none;
-      border-radius: 8px;
-      background-color: #1976d2;
+      border-radius: 10px;
+      background-color: #1557c0;
       color: white;
       font-size: 16px;
+      font-weight: 700;
       cursor: pointer;
-      font-weight:700;
+      transition: 0.2s;
     }
+
     button:hover { background-color: #0d47a1; }
+
     .back {
-      display: block; text-align: center; margin-top: 14px; color: #1976d2; text-decoration: none;
+      display: block;
+      text-align: center;
+      margin-top: 18px;
+      color: #1557c0;
+      text-decoration: none;
+      font-weight: 500;
     }
+
     .back:hover { text-decoration: underline; }
+
+    #memberFields label {
+      margin-top: 10px;
+      font-weight: 500;
+    }
   </style>
 </head>
 <body>
@@ -68,9 +100,9 @@
       <input type="hidden" name="date" value="{{ date }}">
       <input type="hidden" name="hour" value="{{ hour }}">
 
-    <label for="leader_name">대표자 이름</label>
-    <input type="text" id="leader_name" name="leader_name" placeholder="예: 김산데" 
-      required pattern="[가-힣]{2,}" title="이름은 한글 2자 이상으로 입력해주세요.">
+      <label for="leader_name">대표자 이름</label>
+      <input type="text" id="leader_name" name="leader_name" placeholder="예: 김산데" 
+        required pattern="[가-힣]{2,}" title="이름은 한글 2자 이상으로 입력해주세요.">
 
       <label>대표자 학번</label>
       <input name="leader_id" required placeholder="예: A123456">
@@ -83,7 +115,6 @@
 
       <label>인원 수 선택 (대표자 포함, 최대 6명)</label>
       <select id="memberCount" name="memberCount">
-        <!-- 1~6명 -->
         {% for i in range(1,7) %}
           <option value="{{ i }}">{{ i }}명</option>
         {% endfor %}
@@ -102,8 +133,8 @@
     const memberFieldsDiv = document.getElementById('memberFields');
 
     function updateMemberFields() {
-      const total = parseInt(memberCountSelect.value, 10) || 1; // 대표자 포함
-      const teamCount = Math.max(0, Math.min(5, total - 1));   // 팀원은 최대 5명
+      const total = parseInt(memberCountSelect.value, 10) || 1;
+      const teamCount = Math.max(0, Math.min(5, total - 1));
       memberFieldsDiv.innerHTML = '';
       for (let i = 1; i <= teamCount; i++) {
         memberFieldsDiv.innerHTML += `
@@ -133,7 +164,6 @@
         e.preventDefault();
         return;
       }
-      // 팀원 학번 검사
       const memberIds = document.querySelectorAll('[name^="member_"][name$="_id"]');
       for (const input of memberIds) {
         if (input.value.trim() && !idPattern.test(input.value.trim())) {
