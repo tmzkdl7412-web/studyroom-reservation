@@ -96,6 +96,16 @@
       flex-direction: column;
       align-items: center;
       justify-content: center;
+      background: #fff;
+      transition: 0.25s;
+    }
+
+    /* ✅ 선택된 방 강조 */
+    .room.active {
+      background: #e8f0fe; /* 연한 파랑 */
+      border: 3px solid #1a73e8; /* 진한 파랑 */
+      box-shadow: 0 0 12px rgba(26, 115, 232, 0.4);
+      transform: scale(1.02);
     }
 
     .room h3 {
@@ -157,14 +167,14 @@
       border-radius: 14px;
       overflow: hidden;
       box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
-      table-layout: fixed; /* ✅ 고정 크기 */
+      table-layout: fixed;
     }
 
     th, td {
       border: 1px solid #eee;
       text-align: center;
       font-size: 14px;
-      height: 40px; /* ✅ 일정 높이 유지 */
+      height: 40px;
       padding: 4px;
     }
 
@@ -208,13 +218,14 @@
     <div class="layout">
       <div class="building">
         <div class="rooms">
-          <div class="room left">
+          <!-- ✅ 현재 선택된 방만 강조 -->
+          <div class="room left {% if room == '2' %}active{% endif %}">
             <h3>프로젝트실 2</h3>
             <div class="table"></div>
             <div class="door">문</div>
           </div>
 
-          <div class="room right">
+          <div class="room right {% if room == '1' %}active{% endif %}">
             <h3>프로젝트실 1</h3>
             <div class="table"></div>
             <div class="door-mini">문</div>
