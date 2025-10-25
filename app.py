@@ -358,7 +358,6 @@ def extend_page():
         # 🔸 하나만 존재할 경우
         res = group or personal
 
-        # ✅ None 가드 추가 (여기가 핵심 수정)
         if res is None:
             safe_flash("금일 연장 가능한 예약이 없습니다.<br> 예약 종료 20분 전부터만 가능합니다.")
             return redirect(url_for("extend_page"))
@@ -368,17 +367,22 @@ def extend_page():
             safe_flash("⚠️ 이미 한 번 연장된 예약입니다. 추가 연장은 불가합니다.")
             return redirect(url_for("extend_page"))
 
-        # 🔹 예약 종료 시각 계산
+        # 🔹 예약 종료 시각 (KST 적용)
         start_hour = int(res.hour)
-        end_time = datetime.strptime(f"{res.date} {start_hour}:00", "%Y-%m-%d %H:%M") + timedelta(hours=int(res.duration))
+        end_time = datetime.strptime(
+            f"{res.date} {start_hour}:00", "%Y-%m-%d %H:%M"
+        ).replace(tzinfo=KST) + timedelta(hours=int(res.duration))
 
-        # ✅ 연장 가능 시간대 확인 (종료 50분 전~종료 시점)
+        # ✅ 시간 비교시 둘 다 offset-aware로 통일됨
         if not (end_time - timedelta(minutes=50) <= now <= end_time):
             safe_flash("⚠️ 예약 종료 20분 전부터만 연장할 수 있습니다.")
             return redirect(url_for("extend_page"))
 
         # 🔹 경과 시간 계산
-        elapsed = now - datetime.strptime(f"{res.date} {start_hour}:00", "%Y-%m-%d %H:%M")
+        start_time = datetime.strptime(
+            f"{res.date} {start_hour}:00", "%Y-%m-%d %H:%M"
+        ).replace(tzinfo=KST)
+        elapsed = now - start_time
         elapsed_str = f"{elapsed.seconds // 3600}시간 {(elapsed.seconds % 3600) // 60}분"
 
         # ✅ 확인 페이지 렌더링
