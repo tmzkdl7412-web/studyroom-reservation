@@ -366,7 +366,7 @@ def extend_page():
         print(f"[extend_page] now={now}, start_dt={start_dt}, end_dt={end_dt}, remaining(min)={remaining}")
 
         # ✅ 20분 전이 아니면 연장 불가 (1차 차단)
-        if remaining > 60:
+        if remaining > 20:
             safe_flash("⚠️ 예약 종료 20분 전부터만 연장할 수 있습니다.")
             return redirect(url_for("extend_page"))
 
@@ -414,7 +414,7 @@ def extend_confirm():
     print(f"[extend_confirm] now={now}, start_dt={start_dt}, end_dt={end_dt}, remaining(min)={remaining}")
 
     # ✅ 20분 제한 (2차 차단: 직접 POST 우회 방지)
-    if remaining > 60:
+    if remaining > 20:
         safe_flash("⚠️ 예약 종료 20분 전부터만 연장할 수 있습니다.")
         return redirect(url_for("extend_page"))
 
