@@ -439,30 +439,32 @@ def extend_confirm():
             Reservation.date == res.date,
             Reservation.room == res.room,
             cast(Reservation.hour, Integer) < new_end,
-            (cast(Reservation.hour, Integer) + cast(Reservation.duration, Integer)) > current_end
+            (cast(Reservation.hour, Integer) + cast(Reservation.duration, Integer)) > current_end,
+            Reservation.id != res.id
         ).first()
     else:  # 개인석
         overlap = PersonalReservation.query.filter(
             PersonalReservation.date == res.date,
             PersonalReservation.seat == res.seat,
             cast(PersonalReservation.hour, Integer) < new_end,
-            (cast(PersonalReservation.hour, Integer) + cast(PersonalReservation.duration, Integer)) > current_end
+            (cast(PersonalReservation.hour, Integer) + cast(PersonalReservation.duration, Integer)) > current_end,
+            PersonalReservation.id != res.id
         ).first()
 
     if overlap:
         safe_flash("⚠️ 다음 시간대에 이미 예약이 있어 연장할 수 없습니다.")
         return redirect(url_for("extend_page"))
 
-    # ✅ 연장 처리 (무제한 가능)
+    # ✅ 연장 처리 후 DB 반영
     res.duration = str(int(res.duration) + extend_hours)
-    db.session.commit()
+    db.session.commit()  # 🧩 commit 확실히 실행
 
-    # ✅ 완료 페이지 렌더링
     return render_template(
         "extend_done.html",
         res=res,
         extend_hours=extend_hours
     )
+
 
 # -------------------------------
 # 🔸 예약 취소
@@ -522,13 +524,11 @@ def cancel_all_confirm():
         safe_flash("⚠️ 선택된 예약이 없습니다.")
         group_reservations = Reservation.query.filter_by(
             leader_name=leader_name,
-            leader_id=leader_id,
-            leader_phone=leader_phone
+            leader_id=leader_id
         ).order_by(Reservation.date, cast(Reservation.hour, Integer)).all()
         personal_reservations = PersonalReservation.query.filter_by(
             leader_name=leader_name,
-            leader_id=leader_id,
-            leader_phone=leader_phone
+            leader_id=leader_id
         ).order_by(PersonalReservation.date, cast(PersonalReservation.hour, Integer)).all()
 
         return render_template(
@@ -550,22 +550,20 @@ def cancel_all_confirm():
                     date=date,
                     hour=hour,
                     leader_name=leader_name,
-                    leader_id=leader_id,
-                    leader_phone=leader_phone
-                ).delete() or 0
+                    leader_id=leader_id
+                ).delete() or 0  # 🧩 phone 제외
             elif type_ == "personal":
                 personal_deleted += PersonalReservation.query.filter_by(
                     seat=target,
                     date=date,
                     hour=hour,
                     leader_name=leader_name,
-                    leader_id=leader_id,
-                    leader_phone=leader_phone
-                ).delete() or 0
+                    leader_id=leader_id
+                ).delete() or 0  # 🧩 phone 제외
         except Exception as e:
             print("❌ 예약 취소 중 오류:", e)
 
-    db.session.commit()
+    db.session.commit()  # 🧩 commit 확실히 반영
     total_deleted = group_deleted + personal_deleted
 
     if total_deleted > 0:
@@ -573,16 +571,16 @@ def cancel_all_confirm():
     else:
         safe_flash("⚠️ 선택된 예약을 찾을 수 없거나 이미 삭제되었습니다.")
 
+    # ✅ 삭제 후 남은 예약 목록 다시 불러오기
     group_reservations = Reservation.query.filter_by(
         leader_name=leader_name,
-        leader_id=leader_id,
-        leader_phone=leader_phone
-    ).all()
+        leader_id=leader_id
+    ).order_by(Reservation.date, cast(Reservation.hour, Integer)).all()
+
     personal_reservations = PersonalReservation.query.filter_by(
         leader_name=leader_name,
-        leader_id=leader_id,
-        leader_phone=leader_phone
-    ).all()
+        leader_id=leader_id
+    ).order_by(PersonalReservation.date, cast(PersonalReservation.hour, Integer)).all()
 
     return render_template(
         "cancel_all_result.html",
@@ -592,6 +590,7 @@ def cancel_all_confirm():
         leader_id=leader_id,
         leader_phone=leader_phone
     )
+
 @app.route("/cancel_all_result")
 def cancel_all_result():
     return render_template("cancel_all_result.html")
