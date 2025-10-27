@@ -207,31 +207,6 @@ def personal_all():
         days=days, hours=hours, seats=seats
     )
 
-@app.route("/personal_all")
-def personal_all():
-    days = make_days(3)
-    hours = hours_24()
-    reservations = PersonalReservation.query.filter(
-        PersonalReservation.date.in_(days),
-        PersonalReservation.seat.in_([str(i) for i in range(1, 8)])
-    ).all()
-
-    seats = {i: {"reserved": {d: set() for d in days}, "owners": {}} for i in range(1, 8)}
-    for r in reservations:
-        try:
-            seat_num, start, dur = int(r.seat), int(r.hour), int(r.duration or 1)
-            label = f"{(r.leader_id or '').upper()} {(r.leader_name or '').strip()}".strip()
-            for h in expand_hours(start, dur):
-                seats[seat_num]["reserved"][r.date].add(h)
-                seats[seat_num]["owners"][(r.date, h)] = label
-        except Exception as e:
-            print("⚠ personal_all parse error:", e)
-
-    return render_template(
-        "personal/personal_all.html",
-        days=days, hours=hours, seats=seats
-    )
-
 @app.route("/personal_reserve_form")
 def personal_reserve_form():
     seat = request.args.get("seat")
