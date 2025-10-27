@@ -2,13 +2,14 @@ import os
 from flask import Flask, send_from_directory
 from flask_sqlalchemy import SQLAlchemy
 
+# ✅ 전역으로 db 선언
 db = SQLAlchemy()
 
 def create_app():
-    # ✅ 프로젝트 루트 기준 경로 계산
+    """Flask 앱 및 DB 초기화"""
     BASE_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
 
-    # ✅ Flask 앱 생성 시 templates, static 경로 명시
+    # ✅ Flask 앱 생성 (템플릿/정적 경로 설정)
     app = Flask(
         __name__,
         template_folder=os.path.join(BASE_DIR, 'templates'),
@@ -16,37 +17,37 @@ def create_app():
         static_url_path='/static'
     )
 
-    # ✅ Railway 환경변수 DATABASE_URL 사용 (로컬 테스트 대비)
+    # ✅ DB URL 불러오기
     database_url = os.getenv("DATABASE_URL")
 
-    # PostgreSQL URL 변환 (Railway 기본값은 postgres:// 형태)
+    # Railway용 PostgreSQL URL 수정
     if database_url and database_url.startswith("postgres://"):
         database_url = database_url.replace("postgres://", "postgresql://", 1)
 
-    # ✅ 로컬 테스트용 SQLite 기본 DB (환경변수가 없을 때 자동 생성)
+    # ✅ 로컬 테스트용 SQLite fallback
     if not database_url:
         instance_dir = os.path.join(BASE_DIR, "instance")
         os.makedirs(instance_dir, exist_ok=True)
         database_url = f"sqlite:///{os.path.join(instance_dir, 'app.db')}"
 
-    # ✅ DB 설정 적용
+    # ✅ 설정 적용
     app.config["SQLALCHEMY_DATABASE_URI"] = database_url
     app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
     app.secret_key = os.getenv("SECRET_KEY", "studyroom-secret-key")
 
-    # ✅ DB 초기화
+    # ✅ 전역 db 객체와 Flask 앱 연결
+    global db
     db.init_app(app)
 
-    # ✅ 앱 컨텍스트 내에서 테이블 생성 (import loop 방지)
+    # ✅ 모델 import 및 테이블 생성
     with app.app_context():
-        import db.models  # ✅ import db.models로 변경
+        import db.models  # 순환 참조 방지
         db.create_all()
         print("✅ DB 테이블 생성 완료")
 
-    # ✅ static 직접 라우트 추가 (Railway에서 PNG/CSS/JS 안 뜨는 현상 해결)
+    # ✅ 정적 파일 직접 제공 (Railway PNG/CSS 깨짐 방지)
     @app.route('/static/<path:filename>')
     def static_files(filename):
-        """Production 환경(Gunicorn)에서도 static 파일 직접 서빙"""
         static_dir = os.path.join(BASE_DIR, 'static')
         return send_from_directory(static_dir, filename)
 
