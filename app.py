@@ -1,4 +1,4 @@
-from flask import render_template, request, redirect, url_for, flash, session
+xfrom flask import render_template, request, redirect, url_for, flash, session
 from datetime import datetime, timedelta, timezone
 from sqlalchemy import cast, Integer
 from db import create_app, db
@@ -42,10 +42,14 @@ def room_detail():
     days = make_days(7)
     hours = hours_24()
 
-    # ✅ 이번 주(7일치) 데이터만 불러오기
+    # ✅ 이번 주(7일치) + 다음날 1일 추가로 불러오기 (자정 넘김 대응)
+    days_with_next = days + [
+        (datetime.strptime(days[-1], "%Y-%m-%d") + timedelta(days=1)).strftime("%Y-%m-%d")
+    ]
+
     reservations = Reservation.query.filter(
         Reservation.room == room,
-        Reservation.date.in_(days)
+        Reservation.date.in_(days_with_next)
     ).all()
 
     reserved = {d: set() for d in days}
@@ -55,17 +59,32 @@ def room_detail():
         try:
             start = int(r.hour)
             dur = int(r.duration or 1)
+            end = start + dur
+
             rname = (r.leader_name or "").strip()
             rid = (r.leader_id or "").strip().upper()
             label = f"{rid} {rname}" if rname and rname != rid else rid
 
-            for h in expand_hours(start, dur):
-                reserved[r.date].add(h)
-                key = (r.date, h)
-                if key not in owners:
-                    owners[key] = label
-                elif label not in owners[key]:
-                    owners[key] += f", {label}"
+            # ✅ 일반 시간대
+            if end <= 24:
+                for h in expand_hours(start, dur):
+                    if r.date in reserved:
+                        reserved[r.date].add(h)
+                        owners[(r.date, h)] = label
+
+            # ✅ 자정 넘김(24시 초과)인 경우 → 다음날로 일부 반영
+            else:
+                next_date = (datetime.strptime(r.date, "%Y-%m-%d") + timedelta(days=1)).strftime("%Y-%m-%d")
+                # 오늘 날짜 부분
+                for h in range(start, 24):
+                    if r.date in reserved:
+                        reserved[r.date].add(h)
+                        owners[(r.date, h)] = label
+                # 다음날 부분
+                for h in range(0, end - 24):
+                    if next_date in reserved:
+                        reserved[next_date].add(h)
+                        owners[(next_date, h)] = label
 
         except Exception as e:
             print("⚠ hour/duration parse error:", e)
@@ -188,55 +207,102 @@ def personal_detail():
     seat = request.args.get("seat", default=1, type=int)
     days = make_days(3)
     hours = hours_24()
+    days_with_next = days + [
+        (datetime.strptime(days[-1], "%Y-%m-%d") + timedelta(days=1)).strftime("%Y-%m-%d")
+    ]
 
     reservations = PersonalReservation.query.filter(
         PersonalReservation.seat == str(seat),
-        PersonalReservation.date.in_(days)
+        PersonalReservation.date.in_(days_with_next)
     ).all()
 
     reserved = {d: set() for d in days}
     owners = {}
+
     for r in reservations:
         try:
             start = int(r.hour)
             dur = int(r.duration or 1)
+            end = start + dur
             label = f"{(r.leader_id or '').upper()} {(r.leader_name or '').strip()}".strip()
-            for h in expand_hours(start, dur):
-                reserved[r.date].add(h)
-                owners[(r.date, h)] = label
+
+            # ✅ 일반 구간
+            if end <= 24:
+                for h in range(start, end):
+                    if r.date in reserved:
+                        reserved[r.date].add(h)
+                        owners[(r.date, h)] = label
+
+            # ✅ 자정 넘김 구간
+            else:
+                next_date = (datetime.strptime(r.date, "%Y-%m-%d") + timedelta(days=1)).strftime("%Y-%m-%d")
+                for h in range(start, 24):
+                    if r.date in reserved:
+                        reserved[r.date].add(h)
+                        owners[(r.date, h)] = label
+                for h in range(0, end - 24):
+                    if next_date in reserved:
+                        reserved[next_date].add(h)
+                        owners[(next_date, h)] = label
+
         except Exception as e:
             print("⚠ personal_detail parse error:", e)
 
     return render_template(
         "personal/personal_detail.html",
-        seat=seat, days=days, hours=hours,
-        reserved=reserved, owners=owners
+        seat=seat,
+        days=days,
+        hours=hours,
+        reserved=reserved,
+        owners=owners
     )
+
 
 @app.route("/personal_all")
 def personal_all():
     days = make_days(3)
     hours = hours_24()
+    days_with_next = days + [
+        (datetime.strptime(days[-1], "%Y-%m-%d") + timedelta(days=1)).strftime("%Y-%m-%d")
+    ]
+
     reservations = PersonalReservation.query.filter(
-        PersonalReservation.date.in_(days),
+        PersonalReservation.date.in_(days_with_next),
         PersonalReservation.seat.in_([str(i) for i in range(1, 8)])
     ).all()
 
     seats = {i: {"reserved": {d: set() for d in days}, "owners": {}} for i in range(1, 8)}
+
     for r in reservations:
         try:
             seat_num, start, dur = int(r.seat), int(r.hour), int(r.duration or 1)
+            end = start + dur
             label = f"{(r.leader_id or '').upper()} {(r.leader_name or '').strip()}".strip()
-            for h in expand_hours(start, dur):
-                seats[seat_num]["reserved"][r.date].add(h)
-                seats[seat_num]["owners"][(r.date, h)] = label
+
+            # ✅ 일반 구간
+            if end <= 24:
+                for h in range(start, end):
+                    if r.date in seats[seat_num]["reserved"]:
+                        seats[seat_num]["reserved"][r.date].add(h)
+                        seats[seat_num]["owners"][(r.date, h)] = label
+
+            # ✅ 자정 넘김 구간
+            else:
+                next_date = (datetime.strptime(r.date, "%Y-%m-%d") + timedelta(days=1)).strftime("%Y-%m-%d")
+                for h in range(start, 24):
+                    if r.date in seats[seat_num]["reserved"]:
+                        seats[seat_num]["reserved"][r.date].add(h)
+                        seats[seat_num]["owners"][(r.date, h)] = label
+                for h in range(0, end - 24):
+                    if next_date in seats[seat_num]["reserved"]:
+                        seats[seat_num]["reserved"][next_date].add(h)
+                        seats[seat_num]["owners"][(next_date, h)] = label
+
         except Exception as e:
             print("⚠ personal_all parse error:", e)
 
-    return render_template(
-        "personal/personal_all.html",
-        days=days, hours=hours, seats=seats
-    )
+    return render_template("personal/personal_all.html", days=days, hours=hours, seats=seats)
+
 
 @app.route("/personal_reserve_form")
 def personal_reserve_form():
