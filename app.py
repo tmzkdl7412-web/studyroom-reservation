@@ -1,4 +1,4 @@
-from flask import render_template, request, redirect, url_for, flash, session
+xfrom flask import render_template, request, redirect, url_for, flash, session
 from datetime import datetime, timedelta, timezone
 from sqlalchemy import cast, Integer
 from db import create_app, db
@@ -7,10 +7,6 @@ from db.models import Reservation, PersonalReservation
 app = create_app()
 KST = timezone(timedelta(hours=9))
 # ---------------- 유틸 ----------------
-def is_overlap(start1, end1, start2, end2):
-    """두 시간 구간이 겹치면 True 반환"""
-    return not (end1 <= start2 or start1 >= end2)
-    
 def make_days(n=7):
     """✅ 오늘부터 n일치 날짜 리스트 생성 (한국 시간 기준)"""
     base = datetime.now(KST).replace(hour=0, minute=0, second=0, microsecond=0)
@@ -64,33 +60,34 @@ def room_detail():
             start = int(r.hour)
             dur = int(r.duration or 1)
             end = start + dur
+
             rname = (r.leader_name or "").strip()
             rid = (r.leader_id or "").strip().upper()
             label = f"{rid} {rname}" if rname and rname != rid else rid
 
-            # ✅ 일반 구간
+            # ✅ 일반 시간대
             if end <= 24:
                 for h in expand_hours(start, dur):
                     if r.date in reserved:
                         reserved[r.date].add(h)
                         owners[(r.date, h)] = label
-            # ✅ 자정 넘김 구간
+
+            # ✅ 자정 넘김(24시 초과)인 경우 → 다음날로 일부 반영
             else:
                 next_date = (datetime.strptime(r.date, "%Y-%m-%d") + timedelta(days=1)).strftime("%Y-%m-%d")
-                # 오늘 날짜
+                # 오늘 날짜 부분
                 for h in range(start, 24):
                     if r.date in reserved:
                         reserved[r.date].add(h)
                         owners[(r.date, h)] = label
-                # 다음날
-                if next_date in reserved:
-                    for h in range(0, end - 24):
-                        if (next_date, h) not in owners:
-                            reserved[next_date].add(h)
-                            owners[(next_date, h)] = label + " (연장)"
+                # 다음날 부분
+                for h in range(0, end - 24):
+                    if next_date in reserved:
+                        reserved[next_date].add(h)
+                        owners[(next_date, h)] = label
 
         except Exception as e:
-            print("⚠ room_detail parse error:", e)
+            print("⚠ hour/duration parse error:", e)
 
     return render_template(
         "group/room_detail.html",
@@ -100,7 +97,6 @@ def room_detail():
         reserved=reserved,
         owners=owners
     )
-
 
 @app.route("/reserve_form")
 def reserve_form():
@@ -131,60 +127,55 @@ def reserve_group():
 
     start_hour = hour
     end_hour = hour + duration
+
+    # ✅ 자정 넘김 처리 (23시 이후 예약 시)
+    # 예: 23시~02시 → date 다음날로 일부 구간 표시되도록 duration 그대로 유지
     crosses_midnight = end_hour > 24
     next_date = (datetime.strptime(date, "%Y-%m-%d") + timedelta(days=1)).strftime("%Y-%m-%d")
-    end_hour_mod = end_hour % 24  # 다음날 시각용
+    end_hour_mod = end_hour % 24  # 다음날 2시처럼 표시용
 
-    # ✅ 개인석 겹침 검사
+    # ✅ 같은 사용자 개인석 중복 검사
     overlap_personal = PersonalReservation.query.filter(
         PersonalReservation.leader_id == leader_id,
         PersonalReservation.date.in_([date, next_date])
     ).all()
+
     for p in overlap_personal:
         p_start = int(p.hour)
         p_end = p_start + int(p.duration or 1)
-        if p.date == date and is_overlap(start_hour, end_hour, p_start, p_end):
+        # 겹치는 경우 차단
+        if (p.date == date and not (end_hour <= p_start or start_hour >= p_end)) \
+           or (crosses_midnight and p.date == next_date and not (end_hour_mod <= p_start)):
             return render_template(
                 "error.html",
                 title="예약 불가",
-                message=f"⚠️ 이미 {p.date}일 {p.hour}시~{p_end}시 개인석 예약이 있습니다.<br>프로젝트실 예약은 중복 불가합니다.",
-                back_url=f"/room_detail?room={room}"
-            )
-        if crosses_midnight and p.date == next_date and is_overlap(0, end_hour_mod, p_start, p_end):
-            return render_template(
-                "error.html",
-                title="예약 불가",
-                message=f"⚠️ 이미 {next_date}일 {p.hour}시~{p_end}시 개인석 예약이 있습니다.<br>프로젝트실 예약은 중복 불가합니다.",
-                back_url=f"/room_detail?room={room}"
+                message=f"⚠️ 이미 같은 날짜({p.date})에 개인석 예약이 있습니다.<br>프로젝트실 예약은 중복 불가합니다.",
+                back_url=url_for('index')
             )
 
-    # ✅ 단체실 내 시간 중복 검사
+    # ✅ 단체실 내 중복 예약 검사 (오늘 + 다음날 포함)
     existing = Reservation.query.filter(
         Reservation.room == room,
         Reservation.date.in_([date, next_date])
     ).all()
+
+    target_hours = set(range(hour, hour + duration))
     for r in existing:
-        r_start = int(r.hour)
-        r_end = r_start + int(r.duration or 1)
-        if r.date == date and is_overlap(start_hour, end_hour, r_start, r_end):
+        s = int(r.hour)
+        d = int(r.duration or 1)
+        exists_hours = set(range(s, s + d))
+        if target_hours & exists_hours and r.date == date:
             return render_template(
                 "group/simple_msg.html",
                 title="❌ 예약 불가",
-                message=f"{r.date}일 {r.hour}시~{r_end}시까지 이미 예약되어 있습니다.",
-                back_url=f"/room_detail?room={room}"
-            )
-        if crosses_midnight and r.date == next_date and is_overlap(0, end_hour_mod, r_start, r_end):
-            return render_template(
-                "group/simple_msg.html",
-                title="❌ 예약 불가",
-                message=f"{next_date}일 {r.hour}시~{r_end}시까지 이미 예약되어 있습니다.",
+                message=f"{r.date}일 {r.hour}시~{int(r.hour) + int(r.duration)}시까지 이미 예약이 있습니다.",
                 back_url=f"/room_detail?room={room}"
             )
 
     # ✅ DB 저장
     new_resv = Reservation(
         room=room,
-        date=date,
+        date=date,  # 날짜는 시작일 기준으로 저장
         hour=str(hour),
         leader_name=leader_name,
         leader_id=leader_id,
@@ -195,6 +186,7 @@ def reserve_group():
     db.session.add(new_resv)
     db.session.commit()
 
+    # ✅ 로그 출력 (디버깅용)
     if crosses_midnight:
         print(f"✅ DB 커밋 완료: {room} / {date} {hour}시~다음날 {end_hour_mod}시 ({leader_id})")
     else:
@@ -340,72 +332,45 @@ def personal_reserve():
 
     start_hour = hour
     end_hour = hour + duration
-    next_date = (datetime.strptime(date, "%Y-%m-%d") + timedelta(days=1)).strftime("%Y-%m-%d")
 
-    # ✅ 1️⃣ 프로젝트실 중복 검사 (자정 넘김 포함)
-    overlap_groups = Reservation.query.filter(
+    # ✅ 같은 사용자 단체실 중복 검사 (강화 버전)
+    overlap_group = Reservation.query.filter(
         Reservation.leader_id == leader_id,
-        Reservation.date.in_([date, next_date])
+        Reservation.date == date
     ).all()
 
-    for g in overlap_groups:
+    for g in overlap_group:
         g_start = int(g.hour)
-        g_dur = int(g.duration or 1)
-        g_end = g_start + g_dur
-
-        # --- 같은 날짜에서 겹침 ---
-        if g.date == date and not (end_hour <= g_start or start_hour >= g_end):
+        g_end = g_start + int(g.duration or 1)
+        # 겹치거나 딱 맞닿는 경우까지 차단
+        if not (end_hour <= g_start or start_hour >= g_end):
             return render_template(
-                "personal/simple_msg.html",
-                title="❌ 예약 불가",
-                message=f"이미 같은 날짜({date})에 프로젝트실 예약이 있습니다.<br>개인석 예약은 중복 불가합니다.",
+                "error.html",
+                title="예약 불가",
+                message=f"⚠️ 이미 같은 날짜({date})에 프로젝트실 예약이 있습니다.<br>개인석 예약은 중복 불가합니다.",
                 back_url=f"/personal_detail?seat={seat}"
             )
 
-        # --- 프로젝트실이 자정 넘겨 다음날까지 이어지는 경우 ---
-        if g_end > 24 and g.date == date:
-            g_next_end = g_end - 24
-            # 개인석이 다음날이고, 시작 시간이 그 범위와 겹침
-            if date == next_date and start_hour < g_next_end:
-                return render_template(
-                    "personal/simple_msg.html",
-                    title="❌ 예약 불가",
-                    message=f"전날({g.date}) 프로젝트실 예약이 다음날 {g_next_end}시까지 이어집니다.<br>개인석 예약은 중복 불가합니다.",
-                    back_url=f"/personal_detail?seat={seat}"
-                )
-
-    # ✅ 2️⃣ 개인석 중복 검사 (같은 좌석)
-    existing_personals = PersonalReservation.query.filter(
+    # ✅ 같은 개인석 시간대 중복 금지
+    existing = PersonalReservation.query.filter(
         PersonalReservation.seat == seat,
-        PersonalReservation.date.in_([date, next_date])
+        PersonalReservation.date == date
     ).all()
 
-    for r in existing_personals:
+    target_hours = set(range(hour, hour + duration))
+    for r in existing:
         s = int(r.hour)
         d = int(r.duration or 1)
-        e = s + d
-
-        # 같은 날짜 중복
-        if r.date == date and not (end_hour <= s or start_hour >= e):
+        exists_hours = set(range(s, s + d))
+        if target_hours & exists_hours:
             return render_template(
                 "personal/simple_msg.html",
                 title="❌ 예약 불가",
-                message=f"{r.date}일 {r.hour}시~{int(r.hour)+int(r.duration)}시까지 이미 예약이 있습니다.",
+                message=f"{r.date}일 {r.hour}시~{int(r.hour) + int(r.duration)}시까지 이미 예약이 있습니다.",
                 back_url=f"/personal_detail?seat={seat}"
             )
 
-        # 자정 넘김 중복
-        if e > 24 and r.date == date:
-            e_next = e - 24
-            if date == next_date and start_hour < e_next:
-                return render_template(
-                    "personal/simple_msg.html",
-                    title="❌ 예약 불가",
-                    message=f"전날({r.date}) 개인석 예약이 다음날 {e_next}시까지 이어집니다.",
-                    back_url=f"/personal_detail?seat={seat}"
-                )
-
-    # ✅ 3️⃣ DB 저장
+    # ✅ DB 저장
     new_resv = PersonalReservation(
         seat=seat,
         date=date,
