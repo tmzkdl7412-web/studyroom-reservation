@@ -8,9 +8,9 @@ app = create_app()
 KST = timezone(timedelta(hours=9))
 # ---------------- 유틸 ----------------
 def make_days(n=7):
-    """✅ 오늘부터 n일치 날짜 리스트 생성 (한국 시간 기준)"""
     base = datetime.now(KST).replace(hour=0, minute=0, second=0, microsecond=0)
-    return [(base + timedelta(days=i)).strftime("%Y-%m-%d") for i in range(n)]
+    return [(base + timedelta(days=i)).strftime("%Y-%m-%d") for i in range(n + 1)]  # 🔹 +1 해서 다음날 포함
+
 
 def hours_24():
     return list(range(24))
@@ -64,7 +64,7 @@ def room_detail():
 
     # ✅ 이번 주(7일치) 데이터만 불러오기
     reservations = Reservation.query.filter(
-        Reservation.room == room,     # 🔹 문자열 일치 보장
+        Reservation.room == room,
         Reservation.date.in_(days)
     ).all()
 
@@ -79,16 +79,13 @@ def room_detail():
             rid = (r.leader_id or "").strip().upper()
             label = f"{rid} {rname}" if rname and rname != rid else rid
 
-            for h in expand_hours(start, dur):
-                reserved[r.date].add(h)
-                key = (r.date, h)
-                if key not in owners:
-                    owners[key] = label
-                elif label not in owners[key]:
-                    owners[key] += f", {label}"
+            # ✅ 자정 넘는 예약까지 처리
+            for d, h in expand_hours_with_date(r.date, start, dur):
+                reserved.setdefault(d, set()).add(h)  # 🔹 다음날도 자동 추가
+                owners[(d, h)] = label
 
         except Exception as e:
-            print("⚠ hour/duration parse error:", e)
+            print("⚠️ room_detail parse error:", e)
 
     return render_template(
         "group/room_detail.html",
@@ -98,7 +95,6 @@ def room_detail():
         reserved=reserved,
         owners=owners
     )
-
 
 @app.route("/reserve_form")
 def reserve_form():
@@ -204,21 +200,27 @@ def personal_detail():
 
     reserved = {d: set() for d in days}
     owners = {}
+
     for r in reservations:
         try:
             start = int(r.hour)
             dur = int(r.duration or 1)
             label = f"{(r.leader_id or '').upper()} {(r.leader_name or '').strip()}".strip()
-            for h in expand_hours(start, dur):
-                reserved[r.date].add(h)
-                owners[(r.date, h)] = label
+
+            for d, h in expand_hours_with_date(r.date, start, dur):
+                reserved.setdefault(d, set()).add(h)
+                owners[(d, h)] = label
+
         except Exception as e:
             print("⚠ personal_detail parse error:", e)
 
     return render_template(
         "personal/personal_detail.html",
-        seat=seat, days=days, hours=hours,
-        reserved=reserved, owners=owners
+        seat=seat,
+        days=days,
+        hours=hours,
+        reserved=reserved,
+        owners=owners
     )
 
 @app.route("/personal_all")
