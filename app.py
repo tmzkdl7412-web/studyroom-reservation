@@ -16,7 +16,9 @@ def hours_24():
     return list(range(24))
 
 def expand_hours(start_hour, duration):
-    return [h for h in range(start_hour, start_hour + duration) if 0 <= h < 24]
+    """시작 시간부터 duration만큼의 시간 리스트 반환 (24시 넘기지 않음)"""
+    end_hour = min(start_hour + duration, 24)
+    return [h for h in range(start_hour, end_hour)]
 
 # ✅ flash 중복 방지 함수
 def safe_flash(message, category=None):
@@ -40,13 +42,13 @@ def contact():
 # -------------------------------
 @app.route("/room_detail")
 def room_detail():
-    room = request.args.get("room", "1")
+    room = str(request.args.get("room", "1")).strip()
     days = make_days(7)
     hours = hours_24()
 
     # ✅ 이번 주(7일치) 데이터만 불러오기
     reservations = Reservation.query.filter(
-        Reservation.room == room,
+        Reservation.room == room,     # 🔹 문자열 일치 보장
         Reservation.date.in_(days)
     ).all()
 
@@ -80,6 +82,7 @@ def room_detail():
         reserved=reserved,
         owners=owners
     )
+
 
 @app.route("/reserve_form")
 def reserve_form():
