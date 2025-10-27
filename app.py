@@ -9,7 +9,7 @@ KST = timezone(timedelta(hours=9))
 # ---------------- 유틸 ----------------
 def make_days(n=7):
     base = datetime.now(KST).replace(hour=0, minute=0, second=0, microsecond=0)
-    return [(base + timedelta(days=i)).strftime("%Y-%m-%d") for i in range(n + 1)]  # 🔹 +1 해서 다음날 포함
+    return [(base + timedelta(days=i)).strftime("%Y-%m-%d") for i in range(n)]
 
 
 def hours_24():
