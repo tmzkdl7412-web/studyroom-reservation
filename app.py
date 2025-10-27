@@ -15,31 +15,8 @@ def make_days(n=7):
 def hours_24():
     return list(range(24))
 
-def expand_slots_across_days(date_str, start_hour, duration):
-    """
-    시작 시각부터 duration시간 동안을 (날짜, 시) 튜플로 반환.
-    예) 2025-10-27, 23시, 3시간 → [(2025-10-27, 23), (2025-10-28, 0), (2025-10-28, 1)]
-    """
-    base = datetime.strptime(date_str, "%Y-%m-%d")
-    slots = []
-    for k in range(duration):
-        h = start_hour + k
-        d = base + timedelta(days=h // 24)
-        slots.append((d.strftime("%Y-%m-%d"), h % 24))
-    return slots
-def format_span(date_str, start_hour, duration):
-    """
-    시작/종료 시각 문자열을 예쁘게 반환.
-    예) 23시 시작, 3시간 → "23시 ~ 02시 (다음날)"
-    """
-    start_dt = datetime.strptime(f"{date_str} {start_hour:02d}:00", "%Y-%m-%d %H:%M")
-    end_dt = start_dt + timedelta(hours=duration)
-
-    if end_dt.date() != start_dt.date():
-        # 다음날로 넘어감
-        return f"{start_dt.strftime('%H')}시 ~ {end_dt.strftime('%H')}시 (다음날)"
-    else:
-        return f"{start_dt.strftime('%H')}시 ~ {end_dt.strftime('%H')}시"
+def expand_hours(start_hour, duration):
+    return [h for h in range(start_hour, start_hour + duration) if 0 <= h < 24]
 
 # ✅ flash 중복 방지 함수
 def safe_flash(message, category=None):
@@ -49,17 +26,14 @@ def safe_flash(message, category=None):
     else:
         flash(message)
 
-
 # ---------------- 홈/메인 ----------------
 @app.route("/")
 def index():
     return render_template("index.html")
 
-
 @app.route("/contact")
 def contact():
     return render_template("contact.html")
-
 
 # -------------------------------
 # 🔹 단체석 예약 (Project Room)
@@ -107,14 +81,12 @@ def room_detail():
         owners=owners
     )
 
-
 @app.route("/reserve_form")
 def reserve_form():
     room = request.args.get("room")
     date = request.args.get("date")
     hour = int(request.args.get("hour"))
     return render_template("group/reserve_form.html", room=room, date=date, hour=hour)
-
 
 @app.route("/reserve", methods=["POST"])
 def reserve_group():
@@ -139,7 +111,7 @@ def reserve_group():
     start_hour = hour
     end_hour = hour + duration
 
-    # ✅ 같은 사용자 개인석 중복 검사
+    # ✅ 같은 사용자 개인석 중복 검사 (강화 버전)
     overlap_personal = PersonalReservation.query.filter(
         PersonalReservation.leader_id == leader_id,
         PersonalReservation.date == date
@@ -148,6 +120,7 @@ def reserve_group():
     for p in overlap_personal:
         p_start = int(p.hour)
         p_end = p_start + int(p.duration or 1)
+        # 겹치거나 딱 맞닿는 경우까지 차단
         if not (end_hour <= p_start or start_hour >= p_end):
             return render_template(
                 "error.html",
@@ -156,24 +129,7 @@ def reserve_group():
                 back_url=url_for('index')
             )
 
-    # ✅ 같은 사용자 '다른 프로젝트실' 중복 검사 (교차-방 중복 차단)
-    overlap_group_any = Reservation.query.filter(
-        Reservation.leader_id == leader_id,
-        Reservation.date == date
-    ).all()
-
-    for g in overlap_group_any:
-        g_start = int(g.hour)
-        g_end = g_start + int(g.duration or 1)
-        if not (end_hour <= g_start or start_hour >= g_end):
-            return render_template(
-                "group/simple_msg.html",
-                title="❌ 예약 불가",
-                message=f"같은 날짜({date}) 같은 시간대에 이미 프로젝트실 예약이 있습니다.<br>다른 방 중복은 허용되지 않습니다.",
-                back_url=f"/room_detail?room={room}"
-            )
-
-    # ✅ 단체실 내 중복 예약 검사 (같은 방 내부)
+    # ✅ 단체실 내 중복 예약 검사
     existing = Reservation.query.filter(
         Reservation.room == room,
         Reservation.date == date
@@ -246,7 +202,6 @@ def personal_detail():
         reserved=reserved, owners=owners
     )
 
-
 @app.route("/personal_all")
 def personal_all():
     days = make_days(3)
@@ -271,7 +226,6 @@ def personal_all():
         "personal/personal_all.html",
         days=days, hours=hours, seats=seats
     )
-
 
 @app.route("/personal_reserve_form")
 def personal_reserve_form():
@@ -512,7 +466,6 @@ def extend_confirm():
     db.session.commit()
     return render_template("extend_success.html", extend_hours=extend_hours)
 
-
 # -------------------------------
 # 🔸 예약 취소
 # -------------------------------
@@ -642,3 +595,5 @@ def cancel_all_result():
 # ---------------- 실행 ----------------
 if __name__ == "__main__":
     app.run(debug=True)
+
+확인해줘 뭐가 문제야
