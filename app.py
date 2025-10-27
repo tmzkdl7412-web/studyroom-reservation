@@ -596,4 +596,3 @@ def cancel_all_result():
 if __name__ == "__main__":
     app.run(debug=True)
 
-확인해줘 뭐가 문제야
