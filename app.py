@@ -18,14 +18,12 @@ def hours_24():
 def expand_hours(start_hour, duration):
     return [h for h in range(start_hour, start_hour + duration) if 0 <= h < 24]
 
-# ✅ flash 중복 방지 함수
 def safe_flash(message, category=None):
     session.pop('_flashes', None)
     if category:
         flash(message, category=category)
     else:
         flash(message)
-
 # ---------------- 홈/메인 ----------------
 @app.route("/")
 def index():
