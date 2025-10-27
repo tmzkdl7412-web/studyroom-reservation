@@ -36,7 +36,7 @@ def create_app():
     with app.app_context():
         from db import models
         models.db.create_all()
-        print("✅ DB 테이블 생성 완료")
+        print("✅ DB 테이블 생성 완료 —", database_url)
 
     # ✅ 정적 파일 직접 제공 (Railway PNG/CSS 깨짐 방지)
     @app.route('/static/<path:filename>')
