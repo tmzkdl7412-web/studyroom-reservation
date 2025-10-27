@@ -137,9 +137,9 @@
 {% set end = start + (r.duration | int) %}
 {% if end >= 24 %}
   {% set next_day = end - 24 %}
-  <td>{{ start }}시 ~ 다음날 {{ next_day }}시</td>
+  <td>{{ "%02d:00"|format(start) }} ~ 다음날 {{ "%02d:00"|format(next_day) }}</td>
 {% else %}
-  <td>{{ start }}시 ~ {{ end }}시</td>
+  <td>{{ "%02d:00"|format(start) }} ~ {{ "%02d:00"|format(end) }}</td>
 {% endif %}
       </tr>
       {% endfor %}
@@ -155,7 +155,14 @@
         <td><input type="checkbox" name="selected" value="personal:{{ r.id }}"></td>
         <td>개인석 {{ r.seat }}</td>
         <td>{{ r.date }}</td>
-        <td>{{ r.hour }}시 ~ {{ r.hour | int + r.duration | int }}시</td>
+ {% set start = r.hour | int %}
+{% set end = start + (r.duration | int) %}
+{% if end >= 24 %}
+  {% set next_day = end - 24 %}
+  <td>{{ "%02d:00"|format(start) }} ~ 다음날 {{ "%02d:00"|format(next_day) }}</td>
+{% else %}
+  <td>{{ "%02d:00"|format(start) }} ~ {{ "%02d:00"|format(end) }}</td>
+{% endif %}
       </tr>
       {% endfor %}
     </table>
