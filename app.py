@@ -8,33 +8,15 @@ app = create_app()
 KST = timezone(timedelta(hours=9))
 # ---------------- 유틸 ----------------
 def make_days(n=7):
+    """✅ 오늘부터 n일치 날짜 리스트 생성 (한국 시간 기준)"""
     base = datetime.now(KST).replace(hour=0, minute=0, second=0, microsecond=0)
     return [(base + timedelta(days=i)).strftime("%Y-%m-%d") for i in range(n)]
-
 
 def hours_24():
     return list(range(24))
 
-def expand_hours_with_date(date_str, start_hour, duration):
-    """
-    시작 시간과 지속시간(duration)을 받아,
-    자정 넘는 경우 다음날로 자동 분리해서 반환.
-    예: 2025-10-27, 23시, 3시간 → [(2025-10-27, 23), (2025-10-28, 0), (2025-10-28, 1)]
-    """
-    from datetime import datetime, timedelta
-
-    date_obj = datetime.strptime(date_str, "%Y-%m-%d")
-    result = []
-
-    for i in range(duration):
-        hour = start_hour + i
-        if hour < 24:
-            result.append((date_str, hour))
-        else:
-            next_date = (date_obj + timedelta(days=1)).strftime("%Y-%m-%d")
-            result.append((next_date, hour - 24))
-    return result
-
+def expand_hours(start_hour, duration):
+    return [h for h in range(start_hour, start_hour + duration) if 0 <= h < 24]
 
 # ✅ flash 중복 방지 함수
 def safe_flash(message, category=None):
@@ -58,7 +40,7 @@ def contact():
 # -------------------------------
 @app.route("/room_detail")
 def room_detail():
-    room = str(request.args.get("room", "1")).strip()
+    room = request.args.get("room", "1")
     days = make_days(7)
     hours = hours_24()
 
@@ -79,13 +61,16 @@ def room_detail():
             rid = (r.leader_id or "").strip().upper()
             label = f"{rid} {rname}" if rname and rname != rid else rid
 
-            # ✅ 자정 넘는 예약까지 처리
-            for d, h in expand_hours_with_date(r.date, start, dur):
-                reserved.setdefault(d, set()).add(h)  # 🔹 다음날도 자동 추가
-                owners[(d, h)] = label
+            for h in expand_hours(start, dur):
+                reserved[r.date].add(h)
+                key = (r.date, h)
+                if key not in owners:
+                    owners[key] = label
+                elif label not in owners[key]:
+                    owners[key] += f", {label}"
 
         except Exception as e:
-            print("⚠️ room_detail parse error:", e)
+            print("⚠ hour/duration parse error:", e)
 
     return render_template(
         "group/room_detail.html",
@@ -95,9 +80,13 @@ def room_detail():
         reserved=reserved,
         owners=owners
     )
-@app.route("/personal_detail")
-def personal_detail():
-    return redirect(url_for("personal_all"))
+
+@app.route("/reserve_form")
+def reserve_form():
+    room = request.args.get("room")
+    date = request.args.get("date")
+    hour = int(request.args.get("hour"))
+    return render_template("group/reserve_form.html", room=room, date=date, hour=hour)
 
 @app.route("/reserve", methods=["POST"])
 def reserve_group():
@@ -122,33 +111,35 @@ def reserve_group():
     start_hour = hour
     end_hour = hour + duration
 
-    # ✅ 같은 사용자 개인석 중복 검사 (자정 넘김 포함)
-    next_day = (datetime.strptime(date, "%Y-%m-%d") + timedelta(days=1)).strftime("%Y-%m-%d")
+    # ✅ 같은 사용자 개인석 중복 검사 (강화 버전)
     overlap_personal = PersonalReservation.query.filter(
         PersonalReservation.leader_id == leader_id,
-        PersonalReservation.date.in_([date, next_day])
+        PersonalReservation.date == date
     ).all()
 
     for p in overlap_personal:
-        for d, h in expand_hours_with_date(p.date, int(p.hour), int(p.duration or 1)):
-            for td, th in expand_hours_with_date(date, hour, duration):
-                if (d, h) == (td, th):
-                    return render_template(
-                        "error.html",
-                        title="예약 불가",
-                        message=f"⚠️ 개인석 예약과 시간이 겹칩니다.<br>프로젝트실 예약은 중복 불가합니다.",
-                        back_url=url_for('index')
-                    )
+        p_start = int(p.hour)
+        p_end = p_start + int(p.duration or 1)
+        # 겹치거나 딱 맞닿는 경우까지 차단
+        if not (end_hour <= p_start or start_hour >= p_end):
+            return render_template(
+                "error.html",
+                title="예약 불가",
+                message=f"⚠️ 이미 같은 날짜({date})에 개인석 예약이 있습니다.<br>프로젝트실 예약은 중복 불가합니다.",
+                back_url=url_for('index')
+            )
 
-    # ✅ 단체실 내 중복 예약 검사 (자정 넘김 포함)
+    # ✅ 단체실 내 중복 예약 검사
     existing = Reservation.query.filter(
         Reservation.room == room,
-        Reservation.date.in_([date, next_day])
+        Reservation.date == date
     ).all()
 
-    target_hours = set(expand_hours_with_date(date, hour, duration))
+    target_hours = set(range(hour, hour + duration))
     for r in existing:
-        exists_hours = set(expand_hours_with_date(r.date, int(r.hour), int(r.duration or 1)))
+        s = int(r.hour)
+        d = int(r.duration or 1)
+        exists_hours = set(range(s, s + d))
         if target_hours & exists_hours:
             return render_template(
                 "group/simple_msg.html",
@@ -178,11 +169,40 @@ def reserve_group():
         back_url=f"/room_detail?room={room}"
     )
 
-
 # -------------------------------
 # 🔸 개인석 예약 (Personal Seat)
 # -------------------------------
-@app.route("/personal/personal_all")
+@app.route("/personal_detail")
+def personal_detail():
+    seat = request.args.get("seat", default=1, type=int)
+    days = make_days(3)
+    hours = hours_24()
+
+    reservations = PersonalReservation.query.filter(
+        PersonalReservation.seat == str(seat),
+        PersonalReservation.date.in_(days)
+    ).all()
+
+    reserved = {d: set() for d in days}
+    owners = {}
+    for r in reservations:
+        try:
+            start = int(r.hour)
+            dur = int(r.duration or 1)
+            label = f"{(r.leader_id or '').upper()} {(r.leader_name or '').strip()}".strip()
+            for h in expand_hours(start, dur):
+                reserved[r.date].add(h)
+                owners[(r.date, h)] = label
+        except Exception as e:
+            print("⚠ personal_detail parse error:", e)
+
+    return render_template(
+        "personal/personal_detail.html",
+        seat=seat, days=days, hours=hours,
+        reserved=reserved, owners=owners
+    )
+
+@app.route("/personal_all")
 def personal_all():
     days = make_days(3)
     hours = hours_24()
@@ -196,12 +216,9 @@ def personal_all():
         try:
             seat_num, start, dur = int(r.seat), int(r.hour), int(r.duration or 1)
             label = f"{(r.leader_id or '').upper()} {(r.leader_name or '').strip()}".strip()
-
-            # ✅ 자정 넘는 경우도 반영
-            for d, h in expand_hours_with_date(r.date, start, dur):
-                seats[seat_num]["reserved"].setdefault(d, set()).add(h)
-                seats[seat_num]["owners"][(d, h)] = label
-
+            for h in expand_hours(start, dur):
+                seats[seat_num]["reserved"][r.date].add(h)
+                seats[seat_num]["owners"][(r.date, h)] = label
         except Exception as e:
             print("⚠ personal_all parse error:", e)
 
@@ -215,7 +232,7 @@ def personal_reserve_form():
     seat = request.args.get("seat")
     date = request.args.get("date")
     hour = int(request.args.get("hour"))
-    return render_template("personal/personal_reserve_form.html", seat=seat, date=date, hour=hour)
+    return render_template("/personal/personal_reserve_form.html", seat=seat, date=date, hour=hour)
 
 @app.route("/personal_reserve", methods=["POST"])
 def personal_reserve():
@@ -578,4 +595,3 @@ def cancel_all_result():
 # ---------------- 실행 ----------------
 if __name__ == "__main__":
     app.run(debug=True)
-
