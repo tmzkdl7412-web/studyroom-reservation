@@ -137,7 +137,7 @@
 {% set end = start + (r.duration | int) %}
 {% if end >= 24 %}
   {% set next_day = end - 24 %}
-  <td>{{ "%02d:00"|format(start) }} ~ 다음날 {{ "%02d:00"|format(next_day) }}</td>
+  <td>{{ "%02d:00"|format(start) }} ~ {{ "%02d:00"|format(next_day) }}</td>
 {% else %}
   <td>{{ "%02d:00"|format(start) }} ~ {{ "%02d:00"|format(end) }}</td>
 {% endif %}
@@ -159,7 +159,7 @@
 {% set end = start + (r.duration | int) %}
 {% if end >= 24 %}
   {% set next_day = end - 24 %}
-  <td>{{ "%02d:00"|format(start) }} ~ 다음날 {{ "%02d:00"|format(next_day) }}</td>
+  <td>{{ "%02d:00"|format(start) }} ~ {{ "%02d:00"|format(next_day) }}</td>
 {% else %}
   <td>{{ "%02d:00"|format(start) }} ~ {{ "%02d:00"|format(end) }}</td>
 {% endif %}
