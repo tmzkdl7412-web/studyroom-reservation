@@ -42,10 +42,14 @@ def room_detail():
     days = make_days(7)
     hours = hours_24()
 
-    # ✅ 이번 주(7일치) 데이터만 불러오기
+    # ✅ 이번 주(7일치) + 다음날 1일 추가로 불러오기 (자정 넘김 표시용)
+    days_with_next = days + [
+        (datetime.strptime(days[-1], "%Y-%m-%d") + timedelta(days=1)).strftime("%Y-%m-%d")
+    ]
+
     reservations = Reservation.query.filter(
         Reservation.room == room,
-        Reservation.date.in_(days)
+        Reservation.date.in_(days_with_next)
     ).all()
 
     reserved = {d: set() for d in days}
@@ -55,17 +59,25 @@ def room_detail():
         try:
             start = int(r.hour)
             dur = int(r.duration or 1)
+            end = start + dur
             rname = (r.leader_name or "").strip()
             rid = (r.leader_id or "").strip().upper()
             label = f"{rid} {rname}" if rname and rname != rid else rid
+            date_obj = datetime.strptime(r.date, "%Y-%m-%d")
 
-            for h in expand_hours(start, dur):
-                reserved[r.date].add(h)
-                key = (r.date, h)
-                if key not in owners:
-                    owners[key] = label
-                elif label not in owners[key]:
-                    owners[key] += f", {label}"
+            # ✅ 1) 오늘 날짜 부분
+            for h in range(start, min(end, 24)):
+                if r.date in reserved:
+                    reserved[r.date].add(h)
+                    owners[(r.date, h)] = label
+
+            # ✅ 2) 자정 넘긴 경우 → 다음날 일부 시간 표시
+            if end > 24:
+                next_day = (date_obj + timedelta(days=1)).strftime("%Y-%m-%d")
+                if next_day in reserved:
+                    for h in range(0, end - 24):
+                        reserved[next_day].add(h)
+                        owners[(next_day, h)] = label
 
         except Exception as e:
             print("⚠ hour/duration parse error:", e)
@@ -78,6 +90,7 @@ def room_detail():
         reserved=reserved,
         owners=owners
     )
+
 
 @app.route("/reserve_form")
 def reserve_form():
@@ -197,28 +210,53 @@ def personal_detail():
     days = make_days(3)
     hours = hours_24()
 
+    # ✅ 이번 주(3일치) + 다음날 1일 추가로 불러오기 (자정 넘김 표시용)
+    days_with_next = days + [
+        (datetime.strptime(days[-1], "%Y-%m-%d") + timedelta(days=1)).strftime("%Y-%m-%d")
+    ]
+
+    # ✅ 현재 좌석(seat)의 이번 주 예약 모두 불러오기
     reservations = PersonalReservation.query.filter(
         PersonalReservation.seat == str(seat),
-        PersonalReservation.date.in_(days)
+        PersonalReservation.date.in_(days_with_next)
     ).all()
 
+    # ✅ 오늘 기준 표시용 구조
     reserved = {d: set() for d in days}
     owners = {}
+
     for r in reservations:
         try:
             start = int(r.hour)
             dur = int(r.duration or 1)
+            end = start + dur
             label = f"{(r.leader_id or '').upper()} {(r.leader_name or '').strip()}".strip()
-            for h in expand_hours(start, dur):
-                reserved[r.date].add(h)
-                owners[(r.date, h)] = label
+            date_obj = datetime.strptime(r.date, "%Y-%m-%d")
+
+            # ✅ 1) 오늘 날짜 부분
+            for h in range(start, min(end, 24)):
+                if r.date in reserved:
+                    reserved[r.date].add(h)
+                    owners[(r.date, h)] = label
+
+            # ✅ 2) 자정 넘긴 경우 → 다음날 일부 시간 표시
+            if end > 24:
+                next_day = (date_obj + timedelta(days=1)).strftime("%Y-%m-%d")
+                if next_day in reserved:
+                    for h in range(0, end - 24):
+                        reserved[next_day].add(h)
+                        owners[(next_day, h)] = label
+
         except Exception as e:
             print("⚠ personal_detail parse error:", e)
 
     return render_template(
         "personal/personal_detail.html",
-        seat=seat, days=days, hours=hours,
-        reserved=reserved, owners=owners
+        seat=seat,
+        days=days,
+        hours=hours,
+        reserved=reserved,
+        owners=owners
     )
 
 @app.route("/personal_all")
