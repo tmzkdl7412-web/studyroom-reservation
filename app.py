@@ -179,7 +179,7 @@ def reserve_group():
 # -------------------------------
 # 🔸 개인석 예약 (Personal Seat)
 # -------------------------------
-@app.route("personal/personal_all")
+@app.route("/personal/personal_all")
 def personal_all():
     days = make_days(3)
     hours = hours_24()
@@ -212,7 +212,7 @@ def personal_reserve_form():
     seat = request.args.get("seat")
     date = request.args.get("date")
     hour = int(request.args.get("hour"))
-    return render_template("/personal/personal_reserve_form.html", seat=seat, date=date, hour=hour)
+    return render_template("personal/personal_reserve_form.html", seat=seat, date=date, hour=hour)
 
 @app.route("/personal_reserve", methods=["POST"])
 def personal_reserve():
