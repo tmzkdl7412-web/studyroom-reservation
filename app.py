@@ -15,10 +15,26 @@ def make_days(n=7):
 def hours_24():
     return list(range(24))
 
-def expand_hours(start_hour, duration):
-    """시작 시간부터 duration만큼의 시간 리스트 반환 (24시 넘기지 않음)"""
-    end_hour = min(start_hour + duration, 24)
-    return [h for h in range(start_hour, end_hour)]
+def expand_hours_with_date(date_str, start_hour, duration):
+    """
+    시작 시간과 지속시간(duration)을 받아,
+    자정 넘는 경우 다음날로 자동 분리해서 반환.
+    예: 2025-10-27, 23시, 3시간 → [(2025-10-27, 23), (2025-10-28, 0), (2025-10-28, 1)]
+    """
+    from datetime import datetime, timedelta
+
+    date_obj = datetime.strptime(date_str, "%Y-%m-%d")
+    result = []
+
+    for i in range(duration):
+        hour = start_hour + i
+        if hour < 24:
+            result.append((date_str, hour))
+        else:
+            next_date = (date_obj + timedelta(days=1)).strftime("%Y-%m-%d")
+            result.append((next_date, hour - 24))
+    return result
+
 
 # ✅ flash 중복 방지 함수
 def safe_flash(message, category=None):
