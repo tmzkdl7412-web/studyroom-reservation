@@ -95,6 +95,9 @@ def room_detail():
         reserved=reserved,
         owners=owners
     )
+@app.route("/personal_detail")
+def personal_detail():
+    return redirect(url_for("personal_all"))
 
 @app.route("/reserve", methods=["POST"])
 def reserve_group():
