@@ -106,70 +106,57 @@ def reserve_group():
             back_url=f"/room_detail?room={room}"
         )
 
-    # ✅ 시간 확장 (자정 넘는 경우 다음날로 나누기)
-    from datetime import datetime, timedelta
+    start_hour = hour
+    end_hour = hour + duration
 
-    date_obj = datetime.strptime(date, "%Y-%m-%d")
-    reserved_slots = []
-    for i in range(duration):
-        current_hour = hour + i
-        if current_hour < 24:
-            reserved_slots.append((date, current_hour))
-        else:
-            next_day = (date_obj + timedelta(days=1)).strftime("%Y-%m-%d")
-            reserved_slots.append((next_day, current_hour - 24))
+    # ✅ 자정 넘김 처리 (23시 이후 예약 시)
+    # 예: 23시~02시 → date 다음날로 일부 구간 표시되도록 duration 그대로 유지
+    crosses_midnight = end_hour > 24
+    next_date = (datetime.strptime(date, "%Y-%m-%d") + timedelta(days=1)).strftime("%Y-%m-%d")
+    end_hour_mod = end_hour % 24  # 다음날 2시처럼 표시용
 
-    # ✅ 개인석 중복 검사 (하루 + 다음날)
-    next_day = (date_obj + timedelta(days=1)).strftime("%Y-%m-%d")
+    # ✅ 같은 사용자 개인석 중복 검사
     overlap_personal = PersonalReservation.query.filter(
         PersonalReservation.leader_id == leader_id,
-        PersonalReservation.date.in_([date, next_day])
+        PersonalReservation.date.in_([date, next_date])
     ).all()
 
     for p in overlap_personal:
         p_start = int(p.hour)
-        p_dur = int(p.duration or 1)
-        for i in range(p_dur):
-            ph = p_start + i
-            p_day = p.date
-            if ph >= 24:
-                p_day = (datetime.strptime(p.date, "%Y-%m-%d") + timedelta(days=1)).strftime("%Y-%m-%d")
-                ph -= 24
-            if (p_day, ph) in reserved_slots:
-                return render_template(
-                    "error.html",
-                    title="예약 불가",
-                    message="⚠️ 개인석 예약과 시간이 겹칩니다.<br>프로젝트실 예약은 중복 불가합니다.",
-                    back_url=url_for('index')
-                )
+        p_end = p_start + int(p.duration or 1)
+        # 겹치는 경우 차단
+        if (p.date == date and not (end_hour <= p_start or start_hour >= p_end)) \
+           or (crosses_midnight and p.date == next_date and not (end_hour_mod <= p_start)):
+            return render_template(
+                "error.html",
+                title="예약 불가",
+                message=f"⚠️ 이미 같은 날짜({p.date})에 개인석 예약이 있습니다.<br>프로젝트실 예약은 중복 불가합니다.",
+                back_url=url_for('index')
+            )
 
-    # ✅ 같은 방(room) 중복 예약만 차단 (다른 방은 허용)
+    # ✅ 단체실 내 중복 예약 검사 (오늘 + 다음날 포함)
     existing = Reservation.query.filter(
-        Reservation.room == room,  # 🔹 반드시 같은 방만 필터링
-        Reservation.date.in_([date, next_day])
+        Reservation.room == room,
+        Reservation.date.in_([date, next_date])
     ).all()
 
+    target_hours = set(range(hour, hour + duration))
     for r in existing:
-        r_start = int(r.hour)
-        r_dur = int(r.duration or 1)
-        for i in range(r_dur):
-            rh = r_start + i
-            r_day = r.date
-            if rh >= 24:
-                r_day = (datetime.strptime(r.date, "%Y-%m-%d") + timedelta(days=1)).strftime("%Y-%m-%d")
-                rh -= 24
-            if (r_day, rh) in reserved_slots:
-                return render_template(
-                    "group/simple_msg.html",
-                    title="❌ 예약 불가",
-                    message=f"{r.date}일 {r.hour}시~{int(r.hour) + int(r.duration)}시까지 이미 예약이 있습니다.",
-                    back_url=f"/room_detail?room={room}"
-                )
+        s = int(r.hour)
+        d = int(r.duration or 1)
+        exists_hours = set(range(s, s + d))
+        if target_hours & exists_hours and r.date == date:
+            return render_template(
+                "group/simple_msg.html",
+                title="❌ 예약 불가",
+                message=f"{r.date}일 {r.hour}시~{int(r.hour) + int(r.duration)}시까지 이미 예약이 있습니다.",
+                back_url=f"/room_detail?room={room}"
+            )
 
     # ✅ DB 저장
     new_resv = Reservation(
         room=room,
-        date=date,
+        date=date,  # 날짜는 시작일 기준으로 저장
         hour=str(hour),
         leader_name=leader_name,
         leader_id=leader_id,
@@ -180,13 +167,18 @@ def reserve_group():
     db.session.add(new_resv)
     db.session.commit()
 
+    # ✅ 로그 출력 (디버깅용)
+    if crosses_midnight:
+        print(f"✅ DB 커밋 완료: {room} / {date} {hour}시~다음날 {end_hour_mod}시 ({leader_id})")
+    else:
+        print(f"✅ DB 커밋 완료: {room} / {date} {hour}시~{end_hour}시 ({leader_id})")
+
     return render_template(
         "group/simple_msg.html",
         title="✅ 예약 완료",
         message="예약이 성공적으로 완료되었습니다!",
         back_url=f"/room_detail?room={room}"
     )
-
 
 # -------------------------------
 # 🔸 개인석 예약 (Personal Seat)
