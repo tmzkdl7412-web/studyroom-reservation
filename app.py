@@ -96,13 +96,6 @@ def room_detail():
         owners=owners
     )
 
-@app.route("/reserve_form")
-def reserve_form():
-    room = request.args.get("room")
-    date = request.args.get("date")
-    hour = int(request.args.get("hour"))
-    return render_template("group/reserve_form.html", room=room, date=date, hour=hour)
-
 @app.route("/reserve", methods=["POST"])
 def reserve_group():
     room = request.form.get("room")
@@ -126,35 +119,33 @@ def reserve_group():
     start_hour = hour
     end_hour = hour + duration
 
-    # ✅ 같은 사용자 개인석 중복 검사 (강화 버전)
+    # ✅ 같은 사용자 개인석 중복 검사 (자정 넘김 포함)
+    next_day = (datetime.strptime(date, "%Y-%m-%d") + timedelta(days=1)).strftime("%Y-%m-%d")
     overlap_personal = PersonalReservation.query.filter(
         PersonalReservation.leader_id == leader_id,
-        PersonalReservation.date == date
+        PersonalReservation.date.in_([date, next_day])
     ).all()
 
     for p in overlap_personal:
-        p_start = int(p.hour)
-        p_end = p_start + int(p.duration or 1)
-        # 겹치거나 딱 맞닿는 경우까지 차단
-        if not (end_hour <= p_start or start_hour >= p_end):
-            return render_template(
-                "error.html",
-                title="예약 불가",
-                message=f"⚠️ 이미 같은 날짜({date})에 개인석 예약이 있습니다.<br>프로젝트실 예약은 중복 불가합니다.",
-                back_url=url_for('index')
-            )
+        for d, h in expand_hours_with_date(p.date, int(p.hour), int(p.duration or 1)):
+            for td, th in expand_hours_with_date(date, hour, duration):
+                if (d, h) == (td, th):
+                    return render_template(
+                        "error.html",
+                        title="예약 불가",
+                        message=f"⚠️ 개인석 예약과 시간이 겹칩니다.<br>프로젝트실 예약은 중복 불가합니다.",
+                        back_url=url_for('index')
+                    )
 
-    # ✅ 단체실 내 중복 예약 검사
+    # ✅ 단체실 내 중복 예약 검사 (자정 넘김 포함)
     existing = Reservation.query.filter(
         Reservation.room == room,
-        Reservation.date == date
+        Reservation.date.in_([date, next_day])
     ).all()
 
-    target_hours = set(range(hour, hour + duration))
+    target_hours = set(expand_hours_with_date(date, hour, duration))
     for r in existing:
-        s = int(r.hour)
-        d = int(r.duration or 1)
-        exists_hours = set(range(s, s + d))
+        exists_hours = set(expand_hours_with_date(r.date, int(r.hour), int(r.duration or 1)))
         if target_hours & exists_hours:
             return render_template(
                 "group/simple_msg.html",
@@ -184,43 +175,36 @@ def reserve_group():
         back_url=f"/room_detail?room={room}"
     )
 
+
 # -------------------------------
 # 🔸 개인석 예약 (Personal Seat)
 # -------------------------------
-@app.route("/personal_detail")
-def personal_detail():
-    seat = request.args.get("seat", default=1, type=int)
+@app.route("/personal_all")
+def personal_all():
     days = make_days(3)
     hours = hours_24()
-
     reservations = PersonalReservation.query.filter(
-        PersonalReservation.seat == str(seat),
-        PersonalReservation.date.in_(days)
+        PersonalReservation.date.in_(days),
+        PersonalReservation.seat.in_([str(i) for i in range(1, 8)])
     ).all()
 
-    reserved = {d: set() for d in days}
-    owners = {}
-
+    seats = {i: {"reserved": {d: set() for d in days}, "owners": {}} for i in range(1, 8)}
     for r in reservations:
         try:
-            start = int(r.hour)
-            dur = int(r.duration or 1)
+            seat_num, start, dur = int(r.seat), int(r.hour), int(r.duration or 1)
             label = f"{(r.leader_id or '').upper()} {(r.leader_name or '').strip()}".strip()
 
+            # ✅ 자정 넘는 경우도 반영
             for d, h in expand_hours_with_date(r.date, start, dur):
-                reserved.setdefault(d, set()).add(h)
-                owners[(d, h)] = label
+                seats[seat_num]["reserved"].setdefault(d, set()).add(h)
+                seats[seat_num]["owners"][(d, h)] = label
 
         except Exception as e:
-            print("⚠ personal_detail parse error:", e)
+            print("⚠ personal_all parse error:", e)
 
     return render_template(
-        "personal/personal_detail.html",
-        seat=seat,
-        days=days,
-        hours=hours,
-        reserved=reserved,
-        owners=owners
+        "personal/personal_all.html",
+        days=days, hours=hours, seats=seats
     )
 
 @app.route("/personal_all")
