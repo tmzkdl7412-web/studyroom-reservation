@@ -179,7 +179,7 @@ def reserve_group():
 # -------------------------------
 # 🔸 개인석 예약 (Personal Seat)
 # -------------------------------
-@app.route("/personal_all")
+@app.route("personal/personal_all")
 def personal_all():
     days = make_days(3)
     hours = hours_24()
