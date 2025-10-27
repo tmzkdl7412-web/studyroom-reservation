@@ -37,10 +37,11 @@ def create_app():
     # ✅ DB 초기화
     db.init_app(app)
 
-    # ✅ 앱 컨텍스트 내에서 모델 import 및 테이블 생성
+    # ✅ 앱 컨텍스트 내에서 테이블 생성 (import loop 방지)
     with app.app_context():
-        from db import models
+        import db.models  # ✅ import db.models로 변경
         db.create_all()
+        print("✅ DB 테이블 생성 완료")
 
     # ✅ static 직접 라우트 추가 (Railway에서 PNG/CSS/JS 안 뜨는 현상 해결)
     @app.route('/static/<path:filename>')
