@@ -140,7 +140,11 @@
       <input name="leader_phone" required placeholder="예: 010-0000-0000">
 
       <label>이용시간 (시간 단위, 1~3시간)</label>
-      <input type="number" name="duration" value="1" min="1" max="3">
+      <select name="duration" required>
+        <option value="1">1시간</option>
+        <option value="2">2시간</option>
+        <option value="3">3시간</option>
+      </select>
 
       <label>인원 수 선택 (대표자 포함, 최대 6명)</label>
       <select id="memberCount" name="memberCount">
