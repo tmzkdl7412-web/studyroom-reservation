@@ -48,15 +48,32 @@
       font-size: 15px;
     }
 
-    input, select {
-      width: 100%;
-      padding: 14px 14px;
-      margin-top: 6px;
-      border: 1px solid #ccc;
-      border-radius: 8px;
-      font-size: 15px;
-      box-sizing: border-box;
-    }
+    /* ✅ 입력칸(input) — 기본 크기 유지 */
+input {
+  width: 100%;
+  padding: 10px 12px;
+  margin-top: 6px;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  font-size: 15px;
+  box-sizing: border-box;
+}
+
+/* ✅ 선택박스(select) — 크기 키우기 */
+select {
+  width: 100%;
+  padding: 13px 13px;    /* 높이 키움 */
+  margin-top: 8px;
+  border: 1.5px solid #b5b5b5;
+  border-radius: 10px;
+  font-size: 16px;       /* 글자도 살짝 큼 */
+  box-sizing: border-box;
+  appearance: none;
+  background: #fff url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath fill='%23001B4E' d='M1.41 0L6 4.58 10.59 0 12 1.41l-6 6-6-6z'/%3E%3C/svg%3E") no-repeat right 14px center;
+  background-size: 14px;
+  padding-right: 36px;   /* 화살표 안 겹치게 */
+  cursor: pointer;
+}
 
     button {
       margin-top: 26px;
