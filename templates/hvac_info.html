@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>냉/난방 안내</title>
+    <style>
+      * { box-sizing: border-box; }
+      html, body {
+        height: 100%;
+        margin: 0;
+        background-color: #f9fafc;
+        font-family: "Noto Sans KR", sans-serif;
+        color: #001b4e;
+      }
+
+      /* 상하 남색 라인 (메인과 동일) */
+      body::before, body::after {
+        content: "";
+        height: 30px;
+        width: 100%;
+        background: linear-gradient(to right, #001b4e, #003c9e, #001b4e);
+        position: fixed;
+        left: 0;
+        z-index: 9999;
+      }
+      body::before { top: 0; }
+      body::after { bottom: 0; }
+
+      .page {
+        max-width: 900px;
+        margin: 0 auto;
+        padding: 80px 20px 110px;
+      }
+
+      h1 {
+        margin: 0 0 18px;
+        font-size: 34px;
+        font-weight: 800;
+        text-align: center;
+      }
+
+      .card {
+        background: #ffffff;
+        border-radius: 16px;
+        padding: 20px;
+        box-shadow: 0 10px 24px rgba(0,0,0,0.08);
+        border: 1px solid rgba(0,0,0,0.05);
+      }
+
+      .section {
+        margin-top: 18px;
+        padding-top: 18px;
+        border-top: 1px solid rgba(0,0,0,0.08);
+      }
+      .section:first-child {
+        margin-top: 0;
+        padding-top: 0;
+        border-top: 0;
+      }
+
+      .label {
+        font-weight: 800;
+        margin-bottom: 10px;
+        font-size: 16px;
+      }
+
+      .note {
+        background: #eef4ff;
+        border: 1px solid rgba(0,60,158,0.18);
+        color: #001b4e;
+        padding: 12px 14px;
+        border-radius: 12px;
+        line-height: 1.6;
+      }
+
+      .kv {
+        display: grid;
+        grid-template-columns: 110px 1fr;
+        gap: 10px 12px;
+        margin-top: 10px;
+        line-height: 1.6;
+      }
+      .kv .k {
+        font-weight: 800;
+        color: #003c9e;
+      }
+      .kv .v code {
+        background: #f2f4f7;
+        padding: 2px 6px;
+        border-radius: 6px;
+        font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+      }
+
+      .steps {
+        margin: 10px 0 0;
+        padding-left: 18px;
+        line-height: 1.8;
+      }
+
+      .btns {
+        margin-top: 18px;
+        display: flex;
+        gap: 10px;
+        justify-content: center;
+        flex-wrap: wrap;
+      }
+
+      .btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-width: 140px;
+        height: 44px;
+        padding: 0 14px;
+        border-radius: 10px;
+        text-decoration: none;
+        font-weight: 800;
+        color: #fff;
+        background: #003c9e;
+        box-shadow: 0 8px 16px rgba(0,0,0,0.12);
+        transition: transform 0.15s ease, filter 0.15s ease;
+      }
+      .btn:hover { transform: translateY(-2px); filter: brightness(1.05); }
+
+      .btn.gray { background: #5c6b80; }
+
+      @media (max-width: 768px) {
+        h1 { font-size: 26px; }
+        .kv { grid-template-columns: 90px 1fr; }
+      }
+    </style>
+  </head>
+
+  <body>
+    <div class="page">
+      <h1>냉/난방 안내</h1>
+
+      <div class="card">
+        <div class="section">
+          <div class="note">
+            냉/난방 사이트: <strong>http://203.249.68.52/</strong><br />
+            <strong>학교 와이파이를 연결</strong>하고 접속해야지 들어가짐
+          </div>
+        </div>
+
+        <div class="section">
+          <div class="label">개인석</div>
+          <div class="kv">
+            <div class="k">아이디</div>
+            <div class="v"><code>T1009-1</code></div>
+            <div class="k">비밀번호</div>
+            <div class="v"><code>1111</code></div>
+          </div>
+        </div>
+
+        <div class="section">
+          <div class="label">단체석</div>
+
+          <div class="kv">
+            <div class="k">프로젝트실1</div>
+            <div class="v">아이디: <code>T1009-3</code> / 비밀번호: <code>1111</code></div>
+
+            <div class="k">프로젝트실2</div>
+            <div class="v">아이디: <code>T1009-2</code> / 비밀번호: <code>1111</code></div>
+          </div>
+        </div>
+
+        <div class="section">
+          <div class="label">사용 방법</div>
+          <ol class="steps">
+            <li>아이디 비밀번호 입력</li>
+            <li>운전/정지 옆에 있는 버튼 누르기</li>
+            <li>빨간 색이 들어왔으면 아래 전송버튼 클릭</li>
+          </ol>
+        </div>
+
+        <div class="btns">
+          <!-- (선택) 외부 링크도 남길 수 있음: 학교와이파이에서만 열릴 확률 높음 -->
+          <a class="btn" href="http://203.249.68.52/" target="_blank" rel="noopener noreferrer">사이트 열기</a>
+          <a class="btn gray" href="{{ url_for('index') }}">메인으로</a>
+        </div>
+      </div>
+    </div>
+  </body>
+</html>
