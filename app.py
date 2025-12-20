@@ -32,6 +32,10 @@ def index():
 @app.route("/contact")
 def contact():
     return render_template("contact.html")
+    
+@app.route("/hvac_info")
+def hvac_info():
+    return render_template("hvac_info.html")
 
 # -------------------------------
 # 🔹 단체석 예약 (Project Room)
