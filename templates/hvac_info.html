@@ -9,17 +9,25 @@
       html, body {
         height: 100%;
         margin: 0;
-        background-color: #f9fafc;
-        font-family: "Noto Sans KR", sans-serif;
-        color: #001b4e;
+        font-family: 'Noto Sans KR', sans-serif;
+        background: linear-gradient(180deg, #f7f9fc 0%, #eef3ff 100%);
+        color: #001B4E;
       }
 
-      /* 상하 남색 라인 (메인과 동일) */
-      body::before, body::after {
+      body {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        position: relative;
+      }
+
+      /* ✅ 상하단 네이비 라인 (문의사항과 동일) */
+      body::before,
+      body::after {
         content: "";
         height: 30px;
         width: 100%;
-        background: linear-gradient(to right, #001b4e, #003c9e, #001b4e);
+        background: linear-gradient(to right, #001B4E, #003C9E, #001B4E);
         position: fixed;
         left: 0;
         z-index: 9999;
@@ -27,7 +35,72 @@
       body::before { top: 0; }
       body::after { bottom: 0; }
 
-      /* ✅ 학과명 푸터 */
+      .card {
+        background: white;
+        padding: 50px 60px;
+        border-radius: 24px;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.12);
+        text-align: center;
+        max-width: 720px;
+        width: 90%;
+      }
+
+      h2 {
+        font-size: 24px;
+        margin-bottom: 24px;
+        font-weight: 700;
+      }
+
+      .section {
+        margin-top: 22px;
+        text-align: left;
+      }
+
+      .label {
+        font-weight: 700;
+        margin-bottom: 8px;
+      }
+
+      .note {
+        background: #eef4ff;
+        border-radius: 12px;
+        padding: 12px 14px;
+        line-height: 1.6;
+      }
+
+      .kv {
+        margin-top: 6px;
+        line-height: 1.7;
+      }
+
+      code {
+        background: #f2f4f7;
+        padding: 2px 6px;
+        border-radius: 6px;
+        font-weight: 600;
+      }
+
+      ol {
+        margin-top: 8px;
+        padding-left: 20px;
+        line-height: 1.8;
+      }
+
+      a.home {
+        display: block;
+        margin-top: 30px;
+        color: #1557c0;
+        text-decoration: none;
+        font-weight: 600;
+        font-size: 15px;
+        text-align: center;
+      }
+
+      a.home:hover {
+        text-decoration: underline;
+      }
+
+      /* ✅ 문의사항 페이지와 동일한 푸터 */
       .eng-footer {
         position: fixed;
         bottom: 2px;
@@ -39,169 +112,50 @@
         z-index: 10000;
         pointer-events: none;
       }
-
-      @media (max-width: 768px) {
-        .eng-footer {
-          font-size: 12px;
-          bottom: 6px;
-          white-space: nowrap;
-        }
-      }
-
-      .page {
-        max-width: 900px;
-        margin: 0 auto;
-        padding: 80px 20px 110px;
-      }
-
-      h1 {
-        margin: 0 0 18px;
-        font-size: 34px;
-        font-weight: 800;
-        text-align: center;
-      }
-
-      .card {
-        background: #ffffff;
-        border-radius: 16px;
-        padding: 20px;
-        box-shadow: 0 10px 24px rgba(0,0,0,0.08);
-        border: 1px solid rgba(0,0,0,0.05);
-      }
-
-      .section {
-        margin-top: 18px;
-        padding-top: 18px;
-        border-top: 1px solid rgba(0,0,0,0.08);
-      }
-      .section:first-child {
-        margin-top: 0;
-        padding-top: 0;
-        border-top: 0;
-      }
-
-      .label {
-        font-weight: 800;
-        margin-bottom: 10px;
-        font-size: 16px;
-      }
-
-      .note {
-        background: #eef4ff;
-        border: 1px solid rgba(0,60,158,0.18);
-        color: #001b4e;
-        padding: 12px 14px;
-        border-radius: 12px;
-        line-height: 1.6;
-      }
-
-      .kv {
-        display: grid;
-        grid-template-columns: 110px 1fr;
-        gap: 10px 12px;
-        margin-top: 10px;
-        line-height: 1.6;
-      }
-      .kv .k {
-        font-weight: 800;
-        color: #003c9e;
-      }
-      .kv .v code {
-        background: #f2f4f7;
-        padding: 2px 6px;
-        border-radius: 6px;
-        font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
-      }
-
-      .steps {
-        margin: 10px 0 0;
-        padding-left: 18px;
-        line-height: 1.8;
-      }
-
-      .btns {
-        margin-top: 18px;
-        display: flex;
-        gap: 10px;
-        justify-content: center;
-        flex-wrap: wrap;
-      }
-
-      .btn {
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        min-width: 140px;
-        height: 44px;
-        padding: 0 14px;
-        border-radius: 10px;
-        text-decoration: none;
-        font-weight: 800;
-        color: #fff;
-        background: #003c9e;
-        box-shadow: 0 8px 16px rgba(0,0,0,0.12);
-        transition: transform 0.15s ease, filter 0.15s ease;
-      }
-      .btn:hover { transform: translateY(-2px); filter: brightness(1.05); }
-
-      .btn.gray { background: #5c6b80; }
-
-      @media (max-width: 768px) {
-        h1 { font-size: 26px; }
-        .kv { grid-template-columns: 90px 1fr; }
-      }
     </style>
   </head>
 
   <body>
-    <div class="page">
-      <h1>냉/난방 안내</h1>
+    <div class="card">
+      <h2>냉 / 난방 안내</h2>
 
-      <div class="card">
-        <div class="section">
-          <div class="note">
-            냉/난방 사이트: <strong>http://203.249.68.52/</strong>
-          </div>
-        </div>
-
-        <div class="section">
-          <div class="label">개인석</div>
-          <div class="kv">
-            <div class="k">아이디</div>
-            <div class="v"><code>T1009-1</code></div>
-            <div class="k">비밀번호</div>
-            <div class="v"><code>1111</code></div>
-          </div>
-        </div>
-
-        <div class="section">
-          <div class="label">단체석</div>
-
-          <div class="kv">
-            <div class="k">프로젝트실1</div>
-            <div class="v">아이디: <code>T1009-3</code> / 비밀번호: <code>1111</code></div>
-
-            <div class="k">프로젝트실2</div>
-            <div class="v">아이디: <code>T1009-2</code> / 비밀번호: <code>1111</code></div>
-          </div>
-        </div>
-
-        <div class="section">
-          <div class="label">사용 방법</div>
-          <ol class="steps">
-            <li><strong>학교 와이파이 연결 후 사이트 접속</strong></li>
-            <li>아이디 비밀번호 입력</li>
-            <li>운전/정지 옆에 있는 버튼 누르기</li>
-            <li>빨간 색이 들어왔으면 아래 전송버튼 클릭</li>
-          </ol>
-        </div>
-
-        <div class="btns">
-          <a class="btn gray" href="{{ url_for('index') }}">← 메인으로 돌아가기</a>
+      <div class="section">
+        <div class="note">
+          냉/난방 사이트: <strong>http://203.249.68.52/</strong>
         </div>
       </div>
+
+      <div class="section">
+        <div class="label">개인석</div>
+        <div class="kv">
+          아이디: <code>T1009-1</code><br />
+          비밀번호: <code>1111</code>
+        </div>
+      </div>
+
+      <div class="section">
+        <div class="label">단체석</div>
+        <div class="kv">
+          프로젝트실 1 — 아이디: <code>T1009-3</code> / 비밀번호: <code>1111</code><br />
+          프로젝트실 2 — 아이디: <code>T1009-2</code> / 비밀번호: <code>1111</code>
+        </div>
+      </div>
+
+      <div class="section">
+        <div class="label">사용 방법</div>
+        <ol>
+          <li><strong>학교 와이파이 연결 후 사이트 접속</strong></li>
+          <li>아이디 및 비밀번호 입력</li>
+          <li>운전/정지 옆 버튼 클릭</li>
+          <li>빨간 불 확인 후 하단 전송 버튼 클릭</li>
+        </ol>
+      </div>
+
+      <!-- ✅ 문의사항과 동일 -->
+      <a href="{{ url_for('index') }}" class="home">← 메인으로 돌아가기</a>
     </div>
 
+    <!-- ✅ 문의사항과 동일 -->
     <div class="eng-footer">
       Industrial &amp; Data Engineering, Hongik University
     </div>
