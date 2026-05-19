@@ -1,6 +1,6 @@
 from flask import render_template, request, redirect, url_for, flash, session
 from datetime import datetime, timedelta, timezone
-from sqlalchemy import cast, Integer
+from sqlalchemy import cast, Integer, text
 from db import create_app, db
 from db.models import Reservation, PersonalReservation
 
@@ -194,6 +194,11 @@ def reserve_group():
         total_people=1,
         duration=duration
     )
+    db.session.execute(text("""
+    SELECT setval(
+      pg_get_serial_sequence('reservations', 'id'),
+      COALESCE((SELECT MAX(id) FROM reservations), 1)
+    );"""))
     db.session.add(new_resv)
     db.session.commit()
 
