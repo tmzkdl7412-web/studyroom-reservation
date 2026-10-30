@@ -1,0 +1,13 @@
+# Python
+__pycache__/
+*.py[cod]
+
+# 로컬 DB · 환경변수
+instance/
+*.db
+.env
+.venv/
+venv/
+
+# OS
+.DS_Store
